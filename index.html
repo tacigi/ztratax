@@ -44,30 +44,33 @@
   #opponentInfo{color:#fff; font-size:14px; margin-bottom:5px; text-shadow:1px 1px 2px black; font-weight:bold;}
   #boardWrap{width:100%; overflow:auto; background:rgba(0,0,0,0.2); border-radius:10px; padding:15px; display:flex; justify-content:center; min-height:230px; max-height:45vh;}
   #board{position:relative;}
-
+  
   .cellEmpty{position:absolute; width:70px; height:70px; border:1px dashed rgba(255,255,255,.6); border-radius:6px;}
   .cellEmpty.legal{cursor:pointer; background:rgba(31,111,235,.5); border:2px solid var(--accent); animation:pulse 1s infinite;}
   .cellEmpty.legal:hover{background:rgba(31,111,235,.7);}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,235,.6);}50%{box-shadow:0 0 0 8px rgba(31,111,235,0);}}
-
+  
   .card{position:absolute; width:70px; height:70px; display:grid; grid-template-columns:1fr 1fr;
     grid-template-rows:1fr 1fr; border:2px solid var(--primary); border-radius:6px; overflow:hidden;
     background:#fff; box-shadow:0 4px 8px rgba(0,0,0,.3);}
   .card .q{width:100%; height:100%;}
-
+  
   @keyframes popIn {
     0% { transform: scale(0) rotate(-10deg); opacity: 0; }
     60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  .card.placing{ animation: popIn 0.35s ease-out; }
-
-  /* Kartu terbang */
+  .card.placing{ animation: popIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  
+  /* Kartu terbang - lebih halus */
   .flying-card{
     position: fixed;
     z-index: 1000;
     pointer-events: none;
-    transition: left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: left 0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
+                top  0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
+                transform 0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
+                opacity 0.55s ease;
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
@@ -75,9 +78,10 @@
     border-radius: 6px;
     overflow: hidden;
     background: #fff;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    will-change: left, top, transform, opacity;
   }
-
+  
   /* Kartu drag saat dipegang */
   .dragging-card{
     position: fixed;
@@ -92,50 +96,69 @@
     border-radius: 6px;
     overflow: hidden;
     background: #fff;
-    box-shadow: 0 8px 16px rgba(0,0,0,.4);
+    box-shadow: 0 10px 20px rgba(0,0,0,.45);
     transform: rotate(5deg) scale(1.1);
-    opacity: 0.9;
+    opacity: 0.95;
+    transition: transform 0.2s ease;
   }
-
+  
+  /* Tumpukan tarik */
+  .draw-pile{
+    width: 70px;
+    height: 70px;
+    border: 2px dashed rgba(255,255,255,.7);
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+    margin: 10px auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,.3);
+  }
+  
   .handSection{margin:10px 0;}
   .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:5px; text-align:center; text-shadow:1px 1px 2px black;}
   #handPlayer1{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
   #handPlayer2{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
-
+  
   .handCard{width:60px; height:60px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
     border:2px solid var(--primary); border-radius:6px; overflow:hidden; cursor:pointer; background:#fff;
-    box-shadow:0 4px 8px rgba(0,0,0,.25); transition:transform .15s ease, box-shadow .15s ease;}
+    box-shadow:0 4px 8px rgba(0,0,0,.25); transition:transform .2s ease, box-shadow .2s ease;}
   .handCard:hover{transform:translateY(-4px); box-shadow:0 8px 14px rgba(0,0,0,.3);}
   .handCard.selected{outline:3px solid var(--accent); transform:translateY(-8px) scale(1.08);}
-  .handCard.rotate-pulse{ animation: rotatePulse .22s ease; }
-  @keyframes rotatePulse{ 0%{transform:scale(1) rotate(0deg);} 50%{transform:scale(1.08) rotate(10deg);} 100%{transform:scale(1) rotate(0deg);} }
-
+  .handCard.rotate-pulse{ animation: rotatePulse .25s ease; }
+  @keyframes rotatePulse{ 0%{transform:scale(1) rotate(0deg);} 50%{transform:scale(1.1) rotate(15deg);} 100%{transform:scale(1) rotate(0deg);} }
+  
   .ctrlBar{display:flex; gap:8px; justify-content:center; margin-top:8px;}
   .ctrlBtn{padding:8px 14px; border:none; border-radius:20px; font-weight:700; font-size:13px; cursor:pointer; transition:filter .2s;}
   .ctrlBtn.primary{background:var(--accent); color:#fff;}
   .ctrlBtn.gray{background:#e0e0e0; color:#333;}
   .ctrlBtn:disabled{opacity:.4; cursor:not-allowed;}
   .ctrlBtn.primary:disabled{opacity:.4;}
-
+  
   #log{width:100%; max-height:100px; overflow-y:auto; background:var(--panel); border:1px solid var(--border);
     border-radius:10px; padding:10px 12px; font-size:12px; line-height:1.6; margin-top:10px;}
   #log p b.kamu{color:var(--accent);} #log p b.ai{color:var(--danger);}
-
+  
   #restartBar{display:flex; justify-content:center; margin-top:10px;}
-
+  
   #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:50;
     align-items:center; justify-content:center;}
   #overlay .box{background:#fff; border-radius:14px; padding:30px 40px; text-align:center; max-width:90%;}
   #overlay h2{font-size:22px; margin-bottom:10px;}
   #overlay p{font-size:14px; margin-bottom:6px;}
-
-  /* Kunci interaksi ringan saat animasi berjalan, tanpa merender ulang DOM */
+  
   body.interaction-locked #board,
   body.interaction-locked #handPlayer1,
-  body.interaction-locked #handPlayer2{
+  body.interaction-locked #handPlayer2,
+  body.interaction-locked .draw-pile{
     pointer-events:none;
   }
-
+  
   @media (max-width:560px){
     .card,.cellEmpty{width:56px;height:56px;} .handCard{width:50px;height:50px;}
   }
@@ -176,6 +199,9 @@
 
     <!-- Papan di tengah -->
     <div id="boardWrap"><div id="board"></div></div>
+    
+    <!-- Tumpukan Tarik -->
+    <div id="drawPile" class="draw-pile">0</div>
 
     <!-- Area Player 1 (bawah) -->
     <div id="player1Area">
@@ -323,13 +349,11 @@ function legalMoves(hand){
 const boardEl = document.getElementById("board");
 const handP1El = document.getElementById("handPlayer1");
 const handP2El = document.getElementById("handPlayer2");
+const drawPileEl = document.getElementById("drawPile");
 
 function quadDivsHTML(q){
   // Urutan visual grid 2x2 (row-major): TL, TR, BL, BR.
   // q logis = [TL, TR, BR, BL], jadi BL dan BR ditukar posisinya di sini.
-  // WAJIB dipakai di SEMUA representasi visual kartu (kartu asli, kartu
-  // hantu saat drag, kartu terbang saat animasi) supaya tidak ada satupun
-  // yang menampilkan warna kuadran bawah secara tertukar.
   return '<div class="q" style="background:'+COLORS[q[0]].h+'"></div>'+
          '<div class="q" style="background:'+COLORS[q[1]].h+'"></div>'+
          '<div class="q" style="background:'+COLORS[q[3]].h+'"></div>'+
@@ -397,9 +421,6 @@ function renderHands(){
   }
 }
 
-/* Perbarui highlight "selected" pada kartu tangan TANPA membangun ulang DOM.
-   Dipakai selama gestur drag berlangsung supaya elemen yang sedang dipegang
-   pointer tidak pernah dihancurkan di tengah jalan. */
 function updateHandSelectionUI(){
   [handP1El, handP2El].forEach((handEl, pid)=>{
     [...handEl.children].forEach((child, i)=>{
@@ -411,6 +432,9 @@ function updateHandSelectionUI(){
 
 function renderStatus(){
   document.getElementById("opponentInfo").textContent = (S.mode==='pvp' ? "Player 2" : "Komputer") + " (" + S.hands[1].length + " kartu)";
+  
+  // Update jumlah tumpukan tarik
+  drawPileEl.textContent = S.draw.length;
 
   const btn1 = document.getElementById("btnDraw1");
   const btn2 = document.getElementById("btnDraw2");
@@ -453,18 +477,66 @@ function animateMoveCard(fromElement, toElement, cardQ, callback){
   fly.style.width = fromRect.width + 'px';
   fly.style.height = fromRect.height + 'px';
   fly.innerHTML = quadDivsHTML(cardQ);
-
+  fly.style.transform = 'scale(1)';
+  
   document.body.appendChild(fly);
 
   requestAnimationFrame(() => {
+    // Pindahkan posisi, tambah efek scale membesar lalu mengecil, dan sedikit rotasi
     fly.style.left = toRect.left + 'px';
     fly.style.top = toRect.top + 'px';
+    fly.style.transform = 'scale(1.15) rotate(5deg)';
+    
+    // Setelah setengah waktu, kembali ke skala normal
+    setTimeout(() => {
+      fly.style.transform = 'scale(1) rotate(0deg)';
+    }, 250);
   });
 
   setTimeout(() => {
     fly.remove();
     callback();
-  }, 400);
+  }, 550);
+}
+
+/* Fungsi untuk animasi pengambilan kartu dari tumpukan tarik ke tangan */
+function animateDrawToHand(playerIndex, callback){
+  // Ambil kartu dari tumpukan
+  const card = S.draw.shift();
+  if(!card) { callback(); return; }
+  
+  const fromEl = drawPileEl;
+  const toEl = playerIndex === 0 ? handP1El : handP2El;
+  
+  // Buat elemen terbang
+  const fly = document.createElement('div');
+  fly.className = 'flying-card';
+  const fromRect = fromEl.getBoundingClientRect();
+  const toRect = toEl.getBoundingClientRect();
+  fly.style.left = fromRect.left + 'px';
+  fly.style.top = fromRect.top + 'px';
+  fly.style.width = fromRect.width + 'px';
+  fly.style.height = fromRect.height + 'px';
+  fly.innerHTML = quadDivsHTML(card); // kartu belum dirotasi, tampilkan apa adanya
+  document.body.appendChild(fly);
+  
+  // Animasi
+  requestAnimationFrame(() => {
+    fly.style.left = toRect.left + 'px';
+    fly.style.top = toRect.top + 'px';
+    fly.style.transform = 'scale(1.2)';
+    
+    setTimeout(() => {
+      fly.style.transform = 'scale(1)';
+    }, 250);
+  });
+  
+  setTimeout(() => {
+    fly.remove();
+    // Setelah animasi selesai, tambahkan kartu ke tangan
+    S.hands[playerIndex].push(card);
+    callback();
+  }, 550);
 }
 
 /* ================= DRAG & DROP + KLIK ================= */
@@ -476,13 +548,6 @@ function attachDrag(el, pid, cardIndex){
   el.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if(S.locked || S.animating || S.turn !== pid) return;
-
-    // PENTING: jangan render ulang di sini. Render ulang (renderAll/renderHands)
-    // akan mengganti innerHTML tangan pemain dan menghancurkan elemen `el` yang
-    // baru saja disentuh pointer -> pointer capture otomatis dicabut browser ->
-    // pointermove/pointerup berikutnya tidak pernah terpicu -> drag terasa macet.
-    // Pemilihan kartu & highlight dilakukan belakangan (lihat pointermove) tanpa
-    // menyentuh DOM tangan pemain sama sekali.
 
     startX = e.clientX;
     startY = e.clientY;
@@ -502,11 +567,6 @@ function attachDrag(el, pid, cardIndex){
       if(dx + dy > 5){
         isDragging = true;
 
-        // Baru sekarang kartu ditandai terpilih. Update dilakukan tanpa
-        // renderHands(): hanya toggle class 'selected' (aman, tidak mengganti
-        // node) + renderBoard() untuk menyalakan highlight sel yang valid.
-        // renderBoard() tidak menyentuh #handPlayer1/#handPlayer2 sama sekali,
-        // jadi `el` yang sedang dipegang pointer tetap utuh di DOM.
         if(S.selected !== cardIndex){
           S.selected = cardIndex;
           S.selRot = 0;
@@ -514,7 +574,6 @@ function attachDrag(el, pid, cardIndex){
         updateHandSelectionUI();
         renderBoard();
 
-        // Buat elemen ghost
         dragCard = document.createElement('div');
         dragCard.className = 'dragging-card';
         const q = S.hands[pid][cardIndex];
@@ -524,7 +583,6 @@ function attachDrag(el, pid, cardIndex){
         dragCard.style.top = (e.clientY - 30) + 'px';
         document.body.appendChild(dragCard);
 
-        // Sembunyikan kartu asli
         el.style.opacity = '0';
       }
     }
@@ -538,25 +596,18 @@ function attachDrag(el, pid, cardIndex){
   el.addEventListener('pointerup', (e) => {
     if(S.locked || S.animating || S.turn !== pid) return;
 
-    // Kembalikan opacity
     el.style.opacity = '1';
 
     if(!isDragging){
-      // Ini adalah klik biasa - toggle seleksi. Gestur sudah selesai di sini,
-      // jadi renderAll() di dalam onHandClick() aman dipanggil.
       onHandClick(pid, cardIndex);
       return;
     }
 
-    // Drag selesai
     isDragging = false;
 
-    // Hapus ghost
     if(dragCard) dragCard.remove();
     dragCard = null;
 
-    // Cari elemen di bawah kursor (selalu dicari live dari DOM saat ini,
-    // jadi tidak masalah walau papan sempat dirender ulang saat drag dimulai)
     const targetElement = document.elementFromPoint(e.clientX, e.clientY);
     let targetCell = null;
 
@@ -576,10 +627,6 @@ function attachDrag(el, pid, cardIndex){
       const y = +targetCell.dataset.y;
       const q = rotated(S.hands[pid][cardIndex], S.selRot);
       if(canPlace(x, y, q) > 0){
-        // Legal - animasikan ke target. `el` dan `targetCell` MASIH elemen
-        // DOM yang hidup di titik ini (belum ada render ulang sejak drag
-        // dimulai), jadi getBoundingClientRect() di dalam animateMoveCard
-        // akan mengukur posisi yang benar, bukan (0,0).
         S.animating = true;
         S.locked = true;
         document.body.classList.add('interaction-locked');
@@ -590,7 +637,6 @@ function attachDrag(el, pid, cardIndex){
           placeCard(pid, cardIndex, x, y, q);
         });
       } else {
-        // Tidak legal - animasi kembali ke tangan
         const fromRect = targetCell.getBoundingClientRect();
         const toRect = el.getBoundingClientRect();
         const fly = document.createElement('div');
@@ -610,13 +656,12 @@ function attachDrag(el, pid, cardIndex){
         setTimeout(()=>{
           fly.remove();
           S.selected = -1;
-          renderAll(); // aman: gestur sudah selesai total di titik ini
-        }, 400);
+          renderAll();
+        }, 550);
 
         log("Kartu tidak valid, kembali ke tangan.", pid===0?"p1":"p2");
       }
     } else {
-      // Drop di luar papan -> kembali ke tangan
       S.selected = -1;
       renderAll();
     }
@@ -663,9 +708,6 @@ function onCellClick(x, y){
       return;
     }
 
-    // Ukur & mulai animasi dulu selagi fromCard/toCell masih elemen DOM yang
-    // hidup. renderAll() BARU dipanggil di dalam callback (lihat placeCard ->
-    // endTurn -> renderAll), setelah animasi selesai.
     S.animating = true;
     S.locked = true;
     document.body.classList.add('interaction-locked');
@@ -689,18 +731,13 @@ function placeCard(pid, cardIndex, x, y, q){
 
 function handleRotate(pid){
   if(S.locked || S.animating || S.turn !== pid || S.selected < 0) return;
-  // Rotasi diterapkan LANGSUNG (sinkron), tidak lagi ditunda lewat setTimeout.
-  // Sebelumnya, klik cepat berturut-turut (atau drag segera setelah klik
-  // Rotasi) bisa membatalkan increment yang masih tertunda lewat
-  // clearTimeout(), sehingga rotasi terasa "hilang"/kembali ke default.
   S.selRot = (S.selRot + 1) % 4;
   renderAll();
-  // Sentuhan visual saja (opsional), tidak menunda perubahan state di atas.
   const handEl = pid === 0 ? handP1El : handP2El;
   const selectedEl = handEl.querySelector(".handCard.selected");
   if(selectedEl){
     selectedEl.classList.add("rotate-pulse");
-    setTimeout(()=> selectedEl && selectedEl.classList.remove("rotate-pulse"), 220);
+    setTimeout(()=> selectedEl && selectedEl.classList.remove("rotate-pulse"), 250);
   }
 }
 
@@ -715,26 +752,40 @@ document.getElementById("btnDraw1").onclick = ()=>{
   const canMove = legalMoves(S.hands[0]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
-    const c = S.draw.shift();
-    S.hands[0].push(c);
-    log("mengambil 1 kartu.", "p1");
+    // Animasi ambil kartu
+    S.animating = true;
+    S.locked = true;
+    document.body.classList.add('interaction-locked');
+    animateDrawToHand(0, ()=>{
+      document.body.classList.remove('interaction-locked');
+      S.animating = false;
+      log("mengambil 1 kartu.", "p1");
+      endTurn(0);
+    });
   } else {
     log("tumpukan habis, pass.", "p1");
+    endTurn(0);
   }
-  endTurn(0);
 };
+
 document.getElementById("btnDraw2").onclick = ()=>{
   if(S.locked || S.animating || S.turn !== 1) return;
   const canMove = legalMoves(S.hands[1]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
-    const c = S.draw.shift();
-    S.hands[1].push(c);
-    log("mengambil 1 kartu.", "p2");
+    S.animating = true;
+    S.locked = true;
+    document.body.classList.add('interaction-locked');
+    animateDrawToHand(1, ()=>{
+      document.body.classList.remove('interaction-locked');
+      S.animating = false;
+      log("mengambil 1 kartu.", "p2");
+      endTurn(1);
+    });
   } else {
     log("tumpukan habis, pass.", "p2");
+    endTurn(1);
   }
-  endTurn(1);
 };
 
 document.getElementById("btnRestart").onclick = ()=>{
@@ -801,9 +852,6 @@ function aiTurn(){
     }
 
     if(fromCard && toCell){
-      // Sama seperti fix di attachDrag/onCellClick: ukur & mulai animasi
-      // dulu selagi fromCard/toCell masih hidup, baru render ulang di
-      // dalam callback-nya.
       S.animating = true;
       S.locked = true;
       document.body.classList.add('interaction-locked');
@@ -816,9 +864,15 @@ function aiTurn(){
       placeCard(1, m.ci, m.x, m.y, q);
     }
   } else if(S.draw.length > 0){
-    hand.push(S.draw.shift());
-    log("Komputer mengambil 1 kartu.", "p2");
-    endTurn(1);
+    S.animating = true;
+    S.locked = true;
+    document.body.classList.add('interaction-locked');
+    animateDrawToHand(1, ()=>{
+      document.body.classList.remove('interaction-locked');
+      S.animating = false;
+      log("Komputer mengambil 1 kartu.", "p2");
+      endTurn(1);
+    });
   } else {
     log("Komputer pass.", "p2");
     endTurn(1);
