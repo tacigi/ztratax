@@ -62,6 +62,22 @@
   }
   .card.placing{ animation: popIn 0.35s ease-out; }
   
+  /* Kartu terbang */
+  .flying-card{
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    transition: left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    border: 2px solid var(--primary);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  }
+  
   .handSection{margin:10px 0;}
   .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:5px; text-align:center; text-shadow:1px 1px 2px black;}
   #handPlayer1{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
@@ -233,7 +249,8 @@ function newGame(mode){
     selected: -1,
     selRot: 0,
     newCard: null,
-    rotateTimeout: null
+    rotateTimeout: null,
+    animating: false
   };
   log("Permainan dimulai! Player 1 jalan pertama.");
   renderAll();
@@ -294,7 +311,7 @@ function cardHTML(q, cls, style){
 function renderBoard(){
   const cells = [...S.board.keys()].map(k=>k.split(",").map(Number));
   const legalSet = new Set();
-  if(S.selected >= 0 && !S.locked){
+  if(S.selected >= 0 && !S.locked && !S.animating){
     const curPlayer = S.turn;
     if(curPlayer === 0) {
       for(const m of legalMoves(S.hands[0])) legalSet.add(key(m.x,m.y));
@@ -355,7 +372,7 @@ function renderStatus(){
   const btn1 = document.getElementById("btnDraw1");
   const btn2 = document.getElementById("btnDraw2");
   
-  if(S.locked){
+  if(S.locked || S.animating){
     btn1.disabled = true; btn2.disabled = true;
     btn1.textContent = "Ambil Kartu"; btn2.textContent = "Ambil Kartu";
   } else {
@@ -381,9 +398,39 @@ function log(msg, who){
   while(el.children.length > 40) el.lastChild.remove();
 }
 
+/* ================= ANIMASI KARTU TERBANG ================= */
+function animateMoveCard(fromElement, toElement, cardQ, callback){
+  const fromRect = fromElement.getBoundingClientRect();
+  const toRect = toElement.getBoundingClientRect();
+  
+  // Buat elemen kartu sementara
+  const fly = document.createElement('div');
+  fly.className = 'flying-card';
+  fly.style.left = fromRect.left + 'px';
+  fly.style.top = fromRect.top + 'px';
+  fly.style.width = fromRect.width + 'px';
+  fly.style.height = fromRect.height + 'px';
+  // Isi warna dari kartu
+  fly.innerHTML = cardQ.map(c=>'<div class="q" style="background:'+COLORS[c].h+'"></div>').join("");
+  
+  document.body.appendChild(fly);
+  
+  // Paksa reflow lalu pindahkan ke target
+  requestAnimationFrame(() => {
+    fly.style.left = toRect.left + 'px';
+    fly.style.top = toRect.top + 'px';
+  });
+  
+  // Setelah animasi selesai, hapus elemen dan panggil callback
+  setTimeout(() => {
+    fly.remove();
+    callback();
+  }, 400);
+}
+
 /* ================= INTERAKSI ================= */
 function onHandClick(pid, i){
-  if(S.locked) return;
+  if(S.locked || S.animating) return;
   if(S.turn !== pid) return;
   if(S.selected === i){ S.selected = -1; }
   else { S.selected = i; S.selRot = 0; }
@@ -391,22 +438,53 @@ function onHandClick(pid, i){
 }
 
 function onCellClick(x, y){
-  if(S.locked || S.selected < 0) return;
+  if(S.locked || S.animating || S.selected < 0) return;
   const pid = S.turn;
   const card = S.hands[pid][S.selected];
   const q = rotated(card, S.selRot);
   if(canPlace(x, y, q) > 0){
-    S.board.set(key(x,y), { q, byAI: (pid===1 && S.mode==='pve') });
-    S.newCard = key(x,y);
-    S.hands[pid].splice(S.selected, 1);
-    S.selected = -1;
-    log("memasang kartu di ("+x+","+y+").", pid===0 ? "p1" : "p2");
-    endTurn(pid);
+    // Ambil elemen kartu dari tangan
+    const handEl = pid === 0 ? handP1El : handP2El;
+    const fromCard = handEl.querySelector('.handCard.selected');
+    // Cari elemen sel target di papan
+    const boardCells = document.querySelectorAll('.cellEmpty');
+    let toCell = null;
+    for(const cell of boardCells){
+      if(+cell.dataset.x === x && +cell.dataset.y === y){
+        toCell = cell;
+        break;
+      }
+    }
+    
+    if(!fromCard || !toCell){
+      // Fallback jika elemen tidak ditemukan (misal saat AI)
+      placeCard(pid, S.selected, x, y, q);
+      return;
+    }
+    
+    // Animasi
+    S.animating = true;
+    S.locked = true;
+    renderAll(); // nonaktifkan interaksi
+    
+    animateMoveCard(fromCard, toCell, q, ()=>{
+      S.animating = false;
+      placeCard(pid, S.selected, x, y, q);
+    });
   }
 }
 
+function placeCard(pid, cardIndex, x, y, q){
+  S.board.set(key(x,y), { q, byAI: (pid===1 && S.mode==='pve') });
+  S.newCard = key(x,y);
+  S.hands[pid].splice(cardIndex, 1);
+  S.selected = -1;
+  log("memasang kartu di ("+x+","+y+").", pid===0 ? "p1" : "p2");
+  endTurn(pid);
+}
+
 function handleRotate(pid){
-  if(S.locked || S.turn !== pid || S.selected < 0) return;
+  if(S.locked || S.animating || S.turn !== pid || S.selected < 0) return;
   const handEl = pid === 0 ? handP1El : handP2El;
   const selectedEl = handEl.querySelector(".handCard.selected");
   if(!selectedEl) return;
@@ -426,7 +504,7 @@ document.addEventListener("keydown", e=>{
 });
 
 document.getElementById("btnDraw1").onclick = ()=>{
-  if(S.locked || S.turn !== 0) return;
+  if(S.locked || S.animating || S.turn !== 0) return;
   const canMove = legalMoves(S.hands[0]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
@@ -439,7 +517,7 @@ document.getElementById("btnDraw1").onclick = ()=>{
   endTurn(0);
 };
 document.getElementById("btnDraw2").onclick = ()=>{
-  if(S.locked || S.turn !== 1) return;
+  if(S.locked || S.animating || S.turn !== 1) return;
   const canMove = legalMoves(S.hands[1]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
@@ -503,17 +581,42 @@ function aiTurn(){
     moves.sort((a,b)=> b.contacts - a.contacts);
     const best = moves.filter(m=> m.contacts === moves[0].contacts);
     const m = best[Math.floor(Math.random()*best.length)];
-    S.board.set(key(m.x,m.y), { q: m.q, byAI: true });
-    S.newCard = key(m.x,m.y);
-    hand.splice(m.ci, 1);
-    log("Komputer memasang kartu di ("+m.x+","+m.y+")" + (m.contacts>1 ? " — menyentuh "+m.contacts+" kartu!" : "") + ".", "p2");
+    
+    // Tentukan kartu dan target
+    const card = hand[m.ci];
+    const q = rotated(card, m.rot);
+    const handEl = handP2El;
+    const fromCard = handEl.children[m.ci]; // elemen kartu di tangan AI
+    // Cari sel target
+    const boardCells = document.querySelectorAll('.cellEmpty');
+    let toCell = null;
+    for(const cell of boardCells){
+      if(+cell.dataset.x === m.x && +cell.dataset.y === m.y){
+        toCell = cell;
+        break;
+      }
+    }
+    
+    if(fromCard && toCell){
+      S.animating = true;
+      S.locked = true;
+      renderAll(); // nonaktifkan interaksi
+      animateMoveCard(fromCard, toCell, q, ()=>{
+        S.animating = false;
+        placeCard(1, m.ci, m.x, m.y, q);
+      });
+    } else {
+      // Fallback tanpa animasi
+      placeCard(1, m.ci, m.x, m.y, q);
+    }
   } else if(S.draw.length > 0){
     hand.push(S.draw.shift());
     log("Komputer mengambil 1 kartu.", "p2");
+    endTurn(1);
   } else {
     log("Komputer pass.", "p2");
+    endTurn(1);
   }
-  endTurn(1);
 }
 
 /* ================= OVERLAY ================= */
