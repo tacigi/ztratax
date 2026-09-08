@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QUADRAN ZTRATAX - Meja Permainan</title>
 <style>
-  /* ... CSS tetap sama seperti sebelumnya ... */
+  /* CSS SAMA SEPERTI SEBELUMNYA - TIDAK BERUBAH */
   :root{
     --accent:#1F6FEB; --primary:#1A1A1A; --bg:#2B2B2B; --panel:#FFFFFF;
     --border:#D0D7DE; --text:#24292F; --danger:#D6373A; --ok:#2E9E44;
@@ -229,7 +229,6 @@
       <div id="board"></div>
       <!-- Kontrol Navigasi & Zoom (Format Baru) -->
       <div id="boardControls">
-        <!-- Arah PAN dibalik: ↑ geser papan ke bawah agar melihat area atas -->
         <button class="nav-btn" style="grid-area: minus" onclick="zoomOut()">-</button>
         <button class="nav-btn" style="grid-area: up" onclick="pan(0, 50)">↑</button>
         <button class="nav-btn" style="grid-area: plus" onclick="zoomIn()">+</button>
@@ -360,6 +359,70 @@ const SoundEffects = {
   zoom: () => { playTone(700, 0.08, 'sine', 0.2); },
   pan: () => { playTone(500, 0.06, 'sine', 0.15); }
 };
+
+/* ================= MUSIK CHIPTUNE MENU ================= */
+let menuMusicInterval = null;
+let menuMusicPlaying = false;
+
+function scheduleMenuNote(freq, time, duration, volume = 0.2, type = 'square') {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, time);
+  gain.gain.setValueAtTime(0, time);
+  gain.gain.linearRampToValueAtTime(volume, time + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(time);
+  osc.stop(time + duration);
+}
+
+function playMenuMusic() {
+  if (menuMusicPlaying) return;
+  if (!audioCtx) return;
+  
+  menuMusicPlaying = true;
+  
+  const notes = [
+    { freq: 523.25, dur: 0.12 },  // C5
+    { freq: 659.25, dur: 0.12 },  // E5
+    { freq: 783.99, dur: 0.12 },  // G5
+    { freq: 880.00, dur: 0.24 },  // A5
+    { freq: 783.99, dur: 0.12 },  // G5
+    { freq: 659.25, dur: 0.12 },  // E5
+    { freq: 523.25, dur: 0.12 },  // C5
+    { freq: 587.33, dur: 0.24 },  // D5
+  ];
+  
+  let nextNoteTime = audioCtx.currentTime + 0.1;
+  
+  function scheduleLoop() {
+    const now = audioCtx.currentTime;
+    if (nextNoteTime < now) {
+      nextNoteTime = now + 0.1;
+    }
+    
+    for (let i = 0; i < notes.length; i++) {
+      const note = notes[i];
+      const start = nextNoteTime + (i * 0.25);
+      scheduleMenuNote(note.freq, start, note.dur);
+    }
+    
+    nextNoteTime += notes.length * 0.25;
+  }
+  
+  scheduleLoop();
+  menuMusicInterval = setInterval(scheduleLoop, 2500);
+}
+
+function stopMenuMusic() {
+  if (menuMusicInterval) {
+    clearInterval(menuMusicInterval);
+    menuMusicInterval = null;
+  }
+  menuMusicPlaying = false;
+}
 
 /* ================= DECK 210 KARTU ================= */
 function perms(a){
@@ -548,7 +611,7 @@ function applyTransform(){
   boardEl.style.transform = `translate(${viewState.x}px, ${viewState.y}px) scale(${viewState.scale})`;
 }
 
-/* ================= KONTROL ZOOM & PAN (DIPERBAIKI ARAH) ================= */
+/* ================= KONTROL ZOOM & PAN ================= */
 function zoomIn() {
   viewState.scale += 0.1;
   if (viewState.scale > 3) viewState.scale = 3;
@@ -563,7 +626,6 @@ function zoomOut() {
   applyTransform();
 }
 
-/* Pan diperbaiki: tombol atas => geser papan ke bawah agar pandangan naik */
 function pan(dx, dy) {
   viewState.x += dx;
   viewState.y += dy;
@@ -983,8 +1045,10 @@ document.getElementById("btnDraw2").onclick = ()=>{
 
 document.getElementById("btnRestart").onclick = ()=>{
   SoundEffects.click();
+  stopMenuMusic();
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("startScreen").style.display = "flex";
+  playMenuMusic();
 };
 
 /* ================= GILIRAN ================= */
@@ -1090,6 +1154,7 @@ document.getElementById("btnAgain").onclick = ()=>{
   document.getElementById("overlay").style.display = "none";
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("startScreen").style.display = "flex";
+  playMenuMusic();
 };
 
 /* ================= MULAI ================= */
@@ -1110,6 +1175,7 @@ modePvE.onclick = ()=>{
 };
 
 document.getElementById("btnStart").onclick = ()=>{
+  stopMenuMusic();
   initAudio();
   SoundEffects.click();
   document.getElementById("startScreen").style.display = "none";
@@ -1118,10 +1184,19 @@ document.getElementById("btnStart").onclick = ()=>{
   newGame(currentMode);
 };
 
+// Mulai musik saat interaksi pertama
+document.addEventListener('click', function initAudioAndMusic() {
+  initAudio();
+  playMenuMusic();
+  document.removeEventListener('click', initAudioAndMusic);
+});
+
 window.addEventListener('resize', ()=>{
   if(S) fitBoard();
   applyTransform();
 });
+
+window.addEventListener('beforeunload', stopMenuMusic);
 
 (function test(){
   const d = buildDeck();
