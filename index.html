@@ -369,7 +369,6 @@ function renderHands(){
   });
   handP1El.innerHTML = h1;
   handP1El.querySelectorAll(".handCard").forEach(el=>{
-    el.onclick = ()=> onHandClick(0, +el.dataset.i);
     attachDrag(el, 0, +el.dataset.i);
   });
   
@@ -380,7 +379,6 @@ function renderHands(){
   handP2El.innerHTML = h2;
   if(S.mode === 'pvp') {
     handP2El.querySelectorAll(".handCard").forEach(el=>{
-      el.onclick = ()=> onHandClick(1, +el.dataset.i);
       attachDrag(el, 1, +el.dataset.i);
     });
   }
@@ -424,68 +422,75 @@ function animateMoveCard(fromElement, toElement, cardQ, callback){
   const fromRect = fromElement.getBoundingClientRect();
   const toRect = toElement.getBoundingClientRect();
   
-  // Buat elemen kartu sementara
   const fly = document.createElement('div');
   fly.className = 'flying-card';
   fly.style.left = fromRect.left + 'px';
   fly.style.top = fromRect.top + 'px';
   fly.style.width = fromRect.width + 'px';
   fly.style.height = fromRect.height + 'px';
-  // Isi warna dari kartu
   fly.innerHTML = cardQ.map(c=>'<div class="q" style="background:'+COLORS[c].h+'"></div>').join("");
   
   document.body.appendChild(fly);
   
-  // Paksa reflow lalu pindahkan ke target
   requestAnimationFrame(() => {
     fly.style.left = toRect.left + 'px';
     fly.style.top = toRect.top + 'px';
   });
   
-  // Setelah animasi selesai, hapus elemen dan panggil callback
   setTimeout(() => {
     fly.remove();
     callback();
   }, 400);
 }
 
-/* Fungsi untuk drag & drop */
+/* ================= DRAG & DROP + KLIK ================= */
 function attachDrag(el, pid, cardIndex){
   let isDragging = false;
-  let startX, startY, dragCard, lastTarget;
+  let startX, startY;
+  let dragCard = null;
   
   el.addEventListener('pointerdown', (e) => {
     if(S.locked || S.animating || S.turn !== pid) return;
-    // Jika tidak sedang dipilih, pilih dulu
+    
+    // Pilih kartu ini jika belum
     if(S.selected !== cardIndex){
       S.selected = cardIndex;
       S.selRot = 0;
-      renderAll(); // re-render untuk highlight
+      renderAll();
     }
     
-    isDragging = false;
     startX = e.clientX;
     startY = e.clientY;
+    isDragging = false;
     
-    // Simpan target asal
-    lastTarget = el;
+    // Simpan elemen asli
+    el.dataset.dragging = "false";
   });
   
   el.addEventListener('pointermove', (e) => {
-    if(!isDragging && Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > 5){
-      isDragging = true;
-      // Buat elemen drag
-      dragCard = document.createElement('div');
-      dragCard.className = 'dragging-card';
-      const q = S.hands[pid][cardIndex];
-      const displayQ = rotated(q, S.selRot);
-      dragCard.innerHTML = displayQ.map(c=>'<div class="q" style="background:'+COLORS[c].h+'"></div>').join("");
-      dragCard.style.left = (e.clientX - 30) + 'px';
-      dragCard.style.top = (e.clientY - 30) + 'px';
-      document.body.appendChild(dragCard);
-      
-      // Sembunyikan kartu asli
-      el.style.opacity = '0';
+    if(S.locked || S.animating || S.turn !== pid) return;
+    
+    // Jika belum drag, cek apakah melewati threshold
+    if(!isDragging){
+      const dx = Math.abs(e.clientX - startX);
+      const dy = Math.abs(e.clientY - startY);
+      if(dx + dy > 5){
+        isDragging = true;
+        el.dataset.dragging = "true";
+        
+        // Buat elemen ghost
+        dragCard = document.createElement('div');
+        dragCard.className = 'dragging-card';
+        const q = S.hands[pid][cardIndex];
+        const displayQ = rotated(q, S.selRot);
+        dragCard.innerHTML = displayQ.map(c=>'<div class="q" style="background:'+COLORS[c].h+'"></div>').join("");
+        dragCard.style.left = (e.clientX - 30) + 'px';
+        dragCard.style.top = (e.clientY - 30) + 'px';
+        document.body.appendChild(dragCard);
+        
+        // Sembunyikan kartu asli
+        el.style.opacity = '0';
+      }
     }
     
     if(isDragging && dragCard){
@@ -495,18 +500,26 @@ function attachDrag(el, pid, cardIndex){
   });
   
   el.addEventListener('pointerup', (e) => {
+    if(S.locked || S.animating || S.turn !== pid) return;
+    
+    // Kembalikan opacity
+    el.style.opacity = '1';
+    
     if(!isDragging){
-      // Klik biasa
-      el.style.opacity = '1';
+      // Ini adalah klik biasa
       onHandClick(pid, cardIndex);
       return;
     }
     
     // Drag selesai
-    el.style.opacity = '1';
     isDragging = false;
+    el.dataset.dragging = "false";
     
-    // Cari elemen sel target di bawah kursor
+    // Hapus ghost
+    if(dragCard) dragCard.remove();
+    dragCard = null;
+    
+    // Cari sel target di bawah kursor
     const boardCells = document.querySelectorAll('.cellEmpty');
     let targetCell = null;
     for(const cell of boardCells){
@@ -522,25 +535,17 @@ function attachDrag(el, pid, cardIndex){
       const y = +targetCell.dataset.y;
       const q = rotated(S.hands[pid][cardIndex], S.selRot);
       if(canPlace(x, y, q) > 0){
-        // Legal: animasi terbang ke target
+        // Legal - animasikan ke target
         S.animating = true;
         S.locked = true;
-        renderAll(); // nonaktifkan interaksi
-        
-        // Hapus dragCard
-        if(dragCard) dragCard.remove();
-        dragCard = null;
+        renderAll();
         
         animateMoveCard(el, targetCell, q, ()=>{
           S.animating = false;
           placeCard(pid, cardIndex, x, y, q);
         });
       } else {
-        // Tidak legal: kartu kembali ke tangan
-        if(dragCard) dragCard.remove();
-        dragCard = null;
-        
-        // Buat animasi mundur ke posisi asal
+        // Tidak legal - animasi kembali ke tangan
         const fly = document.createElement('div');
         fly.className = 'flying-card';
         const fromRect = targetCell.getBoundingClientRect();
@@ -567,8 +572,6 @@ function attachDrag(el, pid, cardIndex){
       }
     } else {
       // Drop di luar papan -> kembali ke tangan
-      if(dragCard) dragCard.remove();
-      dragCard = null;
       S.selected = -1;
       renderAll();
     }
@@ -580,6 +583,7 @@ function attachDrag(el, pid, cardIndex){
       dragCard = null;
       el.style.opacity = '1';
       isDragging = false;
+      el.dataset.dragging = "false";
       S.selected = -1;
       renderAll();
     }
