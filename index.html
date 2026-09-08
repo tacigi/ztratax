@@ -159,6 +159,17 @@
     pointer-events:none;
   }
   
+  /* ===== PERBAIKAN UNTUK PERANGKAT SENTUH ===== */
+  .handCard, .card, .cellEmpty, #board, #boardWrap, #handPlayer1, #handPlayer2, .draw-pile {
+    touch-action: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+  body.interaction-dragging #boardWrap {
+    overflow: hidden;
+  }
+  
   @media (max-width:560px){
     .card,.cellEmpty{width:56px;height:56px;} .handCard{width:50px;height:50px;}
   }
@@ -566,6 +577,7 @@ function attachDrag(el, pid, cardIndex){
       const dy = Math.abs(e.clientY - startY);
       if(dx + dy > 5){
         isDragging = true;
+        e.preventDefault(); // <--- TAMBAHKAN BARIS INI
 
         if(S.selected !== cardIndex){
           S.selected = cardIndex;
@@ -584,6 +596,9 @@ function attachDrag(el, pid, cardIndex){
         document.body.appendChild(dragCard);
 
         el.style.opacity = '0';
+
+        // Tambahkan class untuk mengunci scroll papan
+        document.body.classList.add('interaction-dragging');
       }
     }
 
@@ -597,6 +612,7 @@ function attachDrag(el, pid, cardIndex){
     if(S.locked || S.animating || S.turn !== pid) return;
 
     el.style.opacity = '1';
+    document.body.classList.remove('interaction-dragging');
 
     if(!isDragging){
       onHandClick(pid, cardIndex);
@@ -671,6 +687,7 @@ function attachDrag(el, pid, cardIndex){
     if(dragCard) dragCard.remove();
     dragCard = null;
     el.style.opacity = '1';
+    document.body.classList.remove('interaction-dragging');
     isDragging = false;
     S.selected = -1;
     renderAll();
