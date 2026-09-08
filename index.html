@@ -54,7 +54,7 @@
     align-items:center;
     min-height:230px;
     max-height:45vh;
-    position: relative; /* Agar kontrol bisa absolute di dalamnya */
+    position: relative;
   }
   #board{position:relative; transform-origin: center center;}
 
@@ -106,19 +106,23 @@
     margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,.3);
   }
 
-  /* ---------- KONTROL NAVIGASI & ZOOM ---------- */
+  /* ---------- KONTROL NAVIGASI & ZOOM (FORMAT BARU) ---------- */
   #boardControls{
     position: absolute;
     bottom: 10px;
     right: 10px;
     display: grid;
+    grid-template-areas: 
+      "minus up plus"
+      "left home right"
+      ". down .";
     grid-template-columns: repeat(3, 35px);
+    grid-template-rows: repeat(3, 35px);
     gap: 4px;
     background: rgba(0,0,0,0.6);
     padding: 6px;
     border-radius: 8px;
     z-index: 10;
-    pointer-events: auto;
   }
   .nav-btn{
     width: 35px; height: 35px;
@@ -229,15 +233,15 @@
     <!-- Papan di tengah -->
     <div id="boardWrap">
       <div id="board"></div>
-      <!-- Kontrol Navigasi & Zoom -->
+      <!-- Kontrol Navigasi & Zoom (Format Baru) -->
       <div id="boardControls">
-        <button class="nav-btn" onclick="pan(0, -50)">↑</button>
-        <button class="nav-btn" onclick="pan(-50, 0)">←</button>
-        <button class="nav-btn" onclick="resetView()">⌂</button>
-        <button class="nav-btn" onclick="pan(50, 0)">→</button>
-        <button class="nav-btn" onclick="pan(0, 50)">↓</button>
-        <button class="nav-btn" onclick="zoomOut()">−</button>
-        <button class="nav-btn" onclick="zoomIn()">+</button>
+        <button class="nav-btn" style="grid-area: minus" onclick="zoomOut()">-</button>
+        <button class="nav-btn" style="grid-area: up" onclick="pan(0, -50)">↑</button>
+        <button class="nav-btn" style="grid-area: plus" onclick="zoomIn()">+</button>
+        <button class="nav-btn" style="grid-area: left" onclick="pan(-50, 0)">←</button>
+        <button class="nav-btn" style="grid-area: home" onclick="resetView()">🏠</button>
+        <button class="nav-btn" style="grid-area: right" onclick="pan(50, 0)">→</button>
+        <button class="nav-btn" style="grid-area: down" onclick="pan(0, 50)">↓</button>
       </div>
     </div>
     
@@ -349,7 +353,6 @@ function newGame(mode){
     newCard: null,
     animating: false
   };
-  // Reset view saat game baru
   viewState = { scale: 1, x: 0, y: 0 };
   log("Permainan dimulai! Player 1 jalan pertama.");
   renderAll();
@@ -465,7 +468,6 @@ function fitBoard(){
   }
   baseFitScale = scale;
   
-  // Jika user belum memanipulasi view, ikuti auto fit
   if(viewState.scale === 1 || viewState.scale === baseFitScale) {
       viewState.scale = baseFitScale;
   }
