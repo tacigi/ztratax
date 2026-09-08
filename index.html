@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QUADRAN ZTRATAX - Meja Permainan</title>
 <style>
+  /* ... CSS tetap sama seperti sebelumnya ... */
   :root{
     --accent:#1F6FEB; --primary:#1A1A1A; --bg:#2B2B2B; --panel:#FFFFFF;
     --border:#D0D7DE; --text:#24292F; --danger:#D6373A; --ok:#2E9E44;
@@ -18,7 +19,6 @@
   h1{font-size:24px; letter-spacing:3px; color:#fff; text-align:center; margin-top:5px; text-shadow:2px 2px 4px rgba(0,0,0,.5);}
   .subtitle{font-size:12px; color:#ccc; font-weight:600; text-align:center; margin-bottom:10px;}
 
-  /* ---------- LAYAR AWAL ---------- */
   #startScreen{display:flex; flex-direction:column; align-items:center; gap:18px; margin-top:6vh;
     background:var(--panel); padding:35px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3); max-width:450px; width:100%;}
   #startScreen h2{font-size:18px; margin-bottom:10px;}
@@ -34,7 +34,6 @@
   .rulesBox{font-size:12px; line-height:1.6; background:#fafafa; border:1px dashed var(--border); border-radius:8px; padding:14px; text-align:left;}
   .rulesBox b{color:var(--primary);}
 
-  /* ---------- PAPAN PERMAINAN ---------- */
   #gameScreen{display:none; width:100%; max-width:1100px; flex-direction:column; align-items:center;}
   #table{
     width:100%; background:var(--table); border:6px solid var(--table-border); border-radius:20px;
@@ -75,7 +74,6 @@
   }
   .card.placing{ animation: popIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-  /* Kartu terbang */
   .flying-card{
     position: fixed; z-index: 1000; pointer-events: none;
     transition: left 0.55s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
@@ -86,7 +84,6 @@
     will-change: left, top, transform, opacity;
   }
 
-  /* Kartu drag saat dipegang */
   .dragging-card{
     position: fixed; z-index: 1000; pointer-events: none;
     width: 60px; height: 60px;
@@ -97,7 +94,6 @@
     transition: transform 0.2s ease;
   }
 
-  /* Tumpukan tarik */
   .draw-pile{
     width: 70px; height: 70px;
     border: 2px dashed rgba(255,255,255,.7); border-radius: 8px;
@@ -106,7 +102,6 @@
     margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,.3);
   }
 
-  /* ---------- KONTROL NAVIGASI & ZOOM (FORMAT BARU) ---------- */
   #boardControls{
     position: absolute;
     bottom: 10px;
@@ -181,7 +176,6 @@
     pointer-events:none;
   }
 
-  /* ===== PERBAIKAN UNTUK PERANGKAT SENTUH ===== */
   .handCard, .card, .cellEmpty, #board, #boardWrap, #handPlayer1, #handPlayer2, .draw-pile {
     touch-action: none !important;
     -webkit-user-select: none !important;
@@ -235,13 +229,14 @@
       <div id="board"></div>
       <!-- Kontrol Navigasi & Zoom (Format Baru) -->
       <div id="boardControls">
+        <!-- Arah PAN dibalik: ↑ geser papan ke bawah agar melihat area atas -->
         <button class="nav-btn" style="grid-area: minus" onclick="zoomOut()">-</button>
-        <button class="nav-btn" style="grid-area: up" onclick="pan(0, -50)">↑</button>
+        <button class="nav-btn" style="grid-area: up" onclick="pan(0, 50)">↑</button>
         <button class="nav-btn" style="grid-area: plus" onclick="zoomIn()">+</button>
-        <button class="nav-btn" style="grid-area: left" onclick="pan(-50, 0)">←</button>
+        <button class="nav-btn" style="grid-area: left" onclick="pan(50, 0)">←</button>
         <button class="nav-btn" style="grid-area: home" onclick="resetView()">🏠</button>
-        <button class="nav-btn" style="grid-area: right" onclick="pan(50, 0)">→</button>
-        <button class="nav-btn" style="grid-area: down" onclick="pan(0, 50)">↓</button>
+        <button class="nav-btn" style="grid-area: right" onclick="pan(-50, 0)">→</button>
+        <button class="nav-btn" style="grid-area: down" onclick="pan(0, -50)">↓</button>
       </div>
     </div>
     
@@ -291,6 +286,81 @@ const COLORS = [
 ];
 const VAL = [1,2,3,4,5,6,7];
 
+/* ================= AUDIO SYSTEM ================= */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio(){
+  if(!audioCtx){
+    audioCtx = new AudioCtx();
+  }
+  if(audioCtx.state === 'suspended'){
+    audioCtx.resume();
+  }
+}
+
+function playTone(freq, duration, type = 'sine', volume = 0.3, delay = 0){
+  if(!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+  gain.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + delay + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(audioCtx.currentTime + delay);
+  osc.stop(audioCtx.currentTime + delay + duration);
+}
+
+function playNoise(duration, volume = 0.2, delay = 0){
+  if(!audioCtx) return;
+  const bufferSize = audioCtx.sampleRate * duration;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i = 0; i < bufferSize; i++){
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  }
+  const source = audioCtx.createBufferSource();
+  source.buffer = buffer;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(volume, audioCtx.currentTime + delay);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+  source.connect(gain).connect(audioCtx.destination);
+  source.start(audioCtx.currentTime + delay);
+}
+
+const SoundEffects = {
+  click: () => { playTone(600, 0.1, 'square', 0.2); },
+  select: () => { playTone(440, 0.12, 'sine', 0.3); playTone(660, 0.1, 'sine', 0.2, 0.1); },
+  rotate: () => { playTone(330, 0.1, 'triangle', 0.3); playTone(550, 0.15, 'triangle', 0.25, 0.1); },
+  dragStart: () => { playTone(220, 0.15, 'sawtooth', 0.2); playTone(330, 0.1, 'sawtooth', 0.15, 0.1); },
+  dropValid: () => { playTone(523, 0.15, 'sine', 0.4); playTone(784, 0.2, 'sine', 0.3, 0.15); },
+  dropInvalid: () => { playTone(150, 0.3, 'sawtooth', 0.3); playTone(100, 0.3, 'sawtooth', 0.2, 0.1); },
+  drawCard: () => { playNoise(0.2, 0.2); playTone(500, 0.1, 'sine', 0.3, 0.1); },
+  place: () => { playTone(392, 0.15, 'triangle', 0.35); playTone(523, 0.15, 'triangle', 0.3, 0.1); playTone(659, 0.2, 'triangle', 0.25, 0.2); },
+  win: () => {
+    playTone(523, 0.15, 'sine', 0.4);
+    playTone(659, 0.15, 'sine', 0.4, 0.15);
+    playTone(784, 0.15, 'sine', 0.4, 0.3);
+    playTone(1046, 0.5, 'sine', 0.45, 0.45);
+  },
+  lose: () => {
+    playTone(392, 0.2, 'sine', 0.4);
+    playTone(330, 0.2, 'sine', 0.4, 0.2);
+    playTone(262, 0.3, 'sine', 0.4, 0.4);
+    playTone(196, 0.6, 'sine', 0.3, 0.6);
+  },
+  draw: () => {
+    playTone(440, 0.2, 'sine', 0.3);
+    playTone(392, 0.2, 'sine', 0.3, 0.15);
+    playTone(349, 0.2, 'sine', 0.3, 0.3);
+    playTone(330, 0.5, 'sine', 0.3, 0.45);
+  },
+  zoom: () => { playTone(700, 0.08, 'sine', 0.2); },
+  pan: () => { playTone(500, 0.06, 'sine', 0.15); }
+};
+
 /* ================= DECK 210 KARTU ================= */
 function perms(a){
   if(a.length <= 1) return [a.slice()];
@@ -331,7 +401,6 @@ const key = (x,y) => x+","+y;
 const DIRS = { N:[0,-1], E:[1,0], S:[0,1], W:[-1,0] };
 const OPP  = { N:"S", E:"W", S:"N", W:"E" };
 
-/* View State untuk Zoom dan Pan */
 let viewState = { scale: 1, x: 0, y: 0 };
 let baseFitScale = 1;
 
@@ -342,8 +411,7 @@ function newGame(mode){
   const board = new Map();
   board.set(key(0,0), { q: deck.shift(), byAI: false });
   
-  // Inisialisasi rotasi untuk setiap kartu di tangan
-  const handRotations = hands.map(hand => hand.map(() => 0)); // semua rotasi awal 0
+  const handRotations = hands.map(hand => hand.map(() => 0));
   
   S = {
     mode: mode,
@@ -354,7 +422,7 @@ function newGame(mode){
     turn: 0,
     locked: false,
     selected: -1,
-    selRot: 0, // tetap dipakai untuk sementara, tapi diambil dari handRotations
+    selRot: 0,
     newCard: null,
     animating: false
   };
@@ -363,7 +431,6 @@ function newGame(mode){
   renderAll();
 }
 
-/* ================= ATURAN ================= */
 function canPlace(x, y, q){
   let contacts = 0;
   for(const d in DIRS){
@@ -456,7 +523,6 @@ function renderBoard(){
   applyTransform();
 }
 
-/* Fungsi untuk menyesuaikan skala papan agar muat di layar */
 function fitBoard(){
   const wrap = document.getElementById("boardWrap");
   const wrapWidth = wrap.clientWidth - 30;
@@ -478,27 +544,30 @@ function fitBoard(){
   }
 }
 
-/* Terapkan Transformasi pada papan */
 function applyTransform(){
   boardEl.style.transform = `translate(${viewState.x}px, ${viewState.y}px) scale(${viewState.scale})`;
 }
 
-/* ================= KONTROL ZOOM & PAN ================= */
+/* ================= KONTROL ZOOM & PAN (DIPERBAIKI ARAH) ================= */
 function zoomIn() {
   viewState.scale += 0.1;
   if (viewState.scale > 3) viewState.scale = 3;
+  SoundEffects.zoom();
   applyTransform();
 }
 
 function zoomOut() {
   viewState.scale -= 0.1;
   if (viewState.scale < 0.5) viewState.scale = 0.5;
+  SoundEffects.zoom();
   applyTransform();
 }
 
+/* Pan diperbaiki: tombol atas => geser papan ke bawah agar pandangan naik */
 function pan(dx, dy) {
   viewState.x += dx;
   viewState.y += dy;
+  SoundEffects.pan();
   applyTransform();
 }
 
@@ -506,15 +575,13 @@ function resetView() {
   viewState.scale = baseFitScale;
   viewState.x = 0;
   viewState.y = 0;
+  SoundEffects.zoom();
   applyTransform();
 }
 
-/* ===== PERBAIKAN: TAMPILKAN ROTASI TERSIMPAN UNTUK SEMUA KARTU ===== */
 function renderHands(){
-  // Player 1
   let h1 = "";
   S.hands[0].forEach((c,i)=>{
-    // Gunakan rotasi tersimpan untuk kartu ini (untuk semua kartu, bukan hanya yang dipilih)
     const rot = S.handRotations[0][i] || 0;
     h1 += cardHTML(rotated(c, rot), "handCard"+(S.turn===0 && S.selected===i?" selected":""), 'data-i="'+i+'"');
   });
@@ -523,7 +590,6 @@ function renderHands(){
     attachDrag(el, 0, +el.dataset.i);
   });
 
-  // Player 2 / Komputer
   let h2 = "";
   S.hands[1].forEach((c,i)=>{
     const rot = S.handRotations[1][i] || 0;
@@ -630,6 +696,8 @@ function animateDrawToHand(playerIndex, callback){
   fly.innerHTML = quadDivsHTML(card);
   document.body.appendChild(fly);
   
+  SoundEffects.drawCard();
+  
   requestAnimationFrame(() => {
     fly.style.left = toRect.left + 'px';
     fly.style.top = toRect.top + 'px';
@@ -643,7 +711,7 @@ function animateDrawToHand(playerIndex, callback){
   setTimeout(() => {
     fly.remove();
     S.hands[playerIndex].push(card);
-    S.handRotations[playerIndex].push(0); // rotasi awal 0
+    S.handRotations[playerIndex].push(0);
     callback();
   }, 550);
 }
@@ -661,6 +729,7 @@ function attachDrag(el, pid, cardIndex){
     startX = e.clientX;
     startY = e.clientY;
     isDragging = false;
+    SoundEffects.click();
 
     try {
       el.setPointerCapture(e.pointerId);
@@ -679,8 +748,8 @@ function attachDrag(el, pid, cardIndex){
 
         if(S.selected !== cardIndex){
           S.selected = cardIndex;
-          // Ambil rotasi tersimpan
           S.selRot = S.handRotations[pid][cardIndex];
+          SoundEffects.dragStart();
         }
         updateHandSelectionUI();
         renderBoard();
@@ -740,6 +809,7 @@ function attachDrag(el, pid, cardIndex){
       const y = +targetCell.dataset.y;
       const q = rotated(S.hands[pid][cardIndex], S.selRot);
       if(canPlace(x, y, q) > 0){
+        SoundEffects.dropValid();
         S.animating = true;
         S.locked = true;
         document.body.classList.add('interaction-locked');
@@ -750,6 +820,7 @@ function attachDrag(el, pid, cardIndex){
           placeCard(pid, cardIndex, x, y, q);
         });
       } else {
+        SoundEffects.dropInvalid();
         const fromRect = targetCell.getBoundingClientRect();
         const toRect = el.getBoundingClientRect();
         const fly = document.createElement('div');
@@ -798,8 +869,8 @@ function onHandClick(pid, i){
   if(S.selected === i){ S.selected = -1; }
   else {
     S.selected = i;
-    // Ambil rotasi tersimpan
     S.selRot = S.handRotations[pid][i];
+    SoundEffects.select();
   }
   renderAll();
 }
@@ -826,6 +897,7 @@ function onCellClick(x, y){
       return;
     }
 
+    SoundEffects.dropValid();
     S.animating = true;
     S.locked = true;
     document.body.classList.add('interaction-locked');
@@ -842,8 +914,9 @@ function placeCard(pid, cardIndex, x, y, q){
   S.board.set(key(x,y), { q, byAI: (pid===1 && S.mode==='pve') });
   S.newCard = key(x,y);
   S.hands[pid].splice(cardIndex, 1);
-  S.handRotations[pid].splice(cardIndex, 1); // hapus rotasi kartu yang ditempatkan
+  S.handRotations[pid].splice(cardIndex, 1);
   S.selected = -1;
+  SoundEffects.place();
   log("memasang kartu di ("+x+","+y+").", pid===0 ? "p1" : "p2");
   endTurn(pid);
 }
@@ -851,8 +924,8 @@ function placeCard(pid, cardIndex, x, y, q){
 function handleRotate(pid){
   if(S.locked || S.animating || S.turn !== pid || S.selected < 0) return;
   S.selRot = (S.selRot + 1) % 4;
-  // Simpan rotasi permanen untuk kartu ini
   S.handRotations[pid][S.selected] = S.selRot;
+  SoundEffects.rotate();
   renderAll();
   const handEl = pid === 0 ? handP1El : handP2El;
   const selectedEl = handEl.querySelector(".handCard.selected");
@@ -909,6 +982,7 @@ document.getElementById("btnDraw2").onclick = ()=>{
 };
 
 document.getElementById("btnRestart").onclick = ()=>{
+  SoundEffects.click();
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("startScreen").style.display = "flex";
 };
@@ -920,6 +994,11 @@ function endTurn(pi){
     const winnerNames = pi === 0 ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer");
     showOverlay("Menang: "+winnerNames, "<p>Semua kartu telah habis.</p>");
     S.locked = true;
+    if(pi === 0){
+      SoundEffects.win();
+    } else {
+      SoundEffects.lose();
+    }
     return;
   }
   if(S.draw.length === 0){
@@ -933,6 +1012,7 @@ function endTurn(pi){
       totals.forEach((t,i)=> body += "<p>"+names(i)+": <b>"+t+"</b>"+(t===min?" (menang)":"")+"</p>");
       showOverlay("Permainan Berakhir", body);
       S.locked = true;
+      SoundEffects.draw();
       return;
     }
   }
@@ -1006,6 +1086,7 @@ function showOverlay(title, body){
   document.getElementById("overlay").style.display = "flex";
 }
 document.getElementById("btnAgain").onclick = ()=>{
+  SoundEffects.click();
   document.getElementById("overlay").style.display = "none";
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("startScreen").style.display = "flex";
@@ -1015,10 +1096,22 @@ document.getElementById("btnAgain").onclick = ()=>{
 let currentMode = 'pvp';
 const modePvP = document.getElementById("modePvP");
 const modePvE = document.getElementById("modePvE");
-modePvP.onclick = ()=>{ currentMode='pvp'; modePvP.classList.add("active"); modePvE.classList.remove("active"); };
-modePvE.onclick = ()=>{ currentMode='pve'; modePvE.classList.add("active"); modePvP.classList.remove("active"); };
+modePvP.onclick = ()=>{
+  currentMode='pvp';
+  modePvP.classList.add("active");
+  modePvE.classList.remove("active");
+  SoundEffects.click();
+};
+modePvE.onclick = ()=>{
+  currentMode='pve';
+  modePvE.classList.add("active");
+  modePvP.classList.remove("active");
+  SoundEffects.click();
+};
 
 document.getElementById("btnStart").onclick = ()=>{
+  initAudio();
+  SoundEffects.click();
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("gameScreen").style.display = "flex";
   document.getElementById("log").innerHTML = "";
