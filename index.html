@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUADRAN ZTRATAX — Player vs Komputer</title>
+<style>
+  :root{
+    --accent:#1F6FEB; --primary:#1A1A1A; --bg:#F6F8FA; --panel:#FFFFFF;
+    --border:#D0D7DE; --text:#24292F; --danger:#D6373A; --ok:#2E9E44;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  body{
+    font-family:'Segoe UI', Arial, sans-serif; background:var(--bg); color:var(--text);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:12px;
+  }
+  h1{font-size:20px; letter-spacing:2px; color:var(--primary); text-align:center;}
+  .subtitle{font-size:12px; color:var(--accent); font-weight:600; text-align:center; margin-bottom:10px;}
+
+  /* ---------- LAYAR AWAL ---------- */
+  #startScreen{display:flex; flex-direction:column; align-items:center; gap:16px; margin-top:8vh;
+    background:var(--panel); padding:32px; border-radius:12px; box-shadow:0 4px 14px rgba(0,0,0,.1); max-width:420px; width:100%;}
+  #startScreen h2{font-size:16px;}
+  .optRow{display:flex; gap:8px;}
+  .optBtn{padding:10px 18px; border:2px solid var(--border); border-radius:8px; background:#fff;
+    font-weight:700; cursor:pointer; font-size:15px;}
+  .optBtn.active{border-color:var(--accent); background:#F0F6FC; color:var(--accent);}
+  .bigBtn{padding:12px 34px; background:var(--accent); color:#fff; border:none; border-radius:30px;
+    font-size:16px; font-weight:700; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.18);}
+  .bigBtn:hover{filter:brightness(1.1);}
+  .bigBtn:disabled{opacity:.4; cursor:not-allowed;}
+  .rulesBox{font-size:12px; line-height:1.6; background:#FAFAFA; border:1px dashed var(--border);
+    border-radius:8px; padding:12px;}
+  .rulesBox b{color:var(--primary);}
+
+  /* ---------- PAPAN PERMAINAN ---------- */
+  #gameScreen{display:none; width:100%; max-width:980px; flex-direction:column; align-items:center;}
+  #topBar{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; width:100%;
+    background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:8px 12px; margin-bottom:10px; font-size:13px;}
+  .pill{background:#F0F6FC; border:1px solid var(--border); border-radius:20px; padding:4px 12px; font-weight:600;}
+  .pill.turn{border-color:var(--accent); color:var(--accent);}
+  #boardWrap{width:100%; overflow:auto; background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:14px; display:flex; justify-content:center; min-height:200px; max-height:52vh;}
+  #board{position:relative;}
+
+  .cellEmpty{position:absolute; width:76px; height:76px; border:1px dashed #E5E8EC; border-radius:6px;}
+  .cellEmpty.legal{cursor:pointer; background:#EAF3FF; border:2px solid var(--accent); animation:pulse 1s infinite;}
+  .cellEmpty.legal:hover{background:#D6E8FF;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,235,.4);}50%{box-shadow:0 0 0 6px rgba(31,111,235,0);}}
+
+  .card{position:absolute; width:76px; height:76px; display:grid; grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr; border:1.5px solid var(--primary); border-radius:6px; overflow:hidden;
+    background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.15);}
+  .card .q{width:100%; height:100%;}
+
+  /* ---------- TANGAN PEMAIN ---------- */
+  #handArea{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0; min-height:70px;}
+  .handCard{width:64px; height:64px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
+    border:2px solid var(--primary); border-radius:6px; overflow:hidden; cursor:pointer; background:#fff;
+    box-shadow:0 2px 5px rgba(0,0,0,.15); transition:transform .12s;}
+  .handCard:hover{transform:translateY(-4px);}
+  .handCard.selected{outline:3px solid var(--accent); transform:translateY(-8px) scale(1.06);}
+
+  /* ---------- KONTROL ---------- */
+  #ctrlBar{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:10px;}
+  .ctrlBtn{padding:10px 18px; border:none; border-radius:24px; font-weight:700; font-size:14px; cursor:pointer;}
+  .ctrlBtn.primary{background:var(--accent); color:#fff;}
+  .ctrlBtn.gray{background:#E7EAEE; color:var(--text);}
+  .ctrlBtn:disabled{opacity:.35; cursor:not-allowed;}
+
+  /* ---------- LOG & OVERLAY ---------- */
+  #log{width:100%; max-height:110px; overflow-y:auto; background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:8px 12px; font-size:12px; line-height:1.6;}
+  #log p b.kamu{color:var(--accent);} #log p b.ai{color:var(--danger);}
+  #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:50;
+    align-items:center; justify-content:center;}
+  #overlay .box{background:#fff; border-radius:14px; padding:30px 40px; text-align:center; max-width:90%;}
+  #overlay h2{font-size:22px; margin-bottom:10px;}
+  #overlay p{font-size:14px; margin-bottom:6px;}
+  @media (max-width:560px){ .card,.cellEmpty{width:60px;height:60px;} .handCard{width:52px;height:52px;} }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<h1>QUADRAN ZTRATAX</h1>
+<div class="subtitle">Rulebook Resmi · Edisi 210 Kartu · Player vs Komputer</div>
+
+<!-- LAYAR AWAL -->
+<div id="startScreen">
+  <h2>Jumlah Lawan Komputer</h2>
+  <div class="optRow">
+    <button class="optBtn active" data-n="1">1</button>
+    <button class="optBtn" data-n="2">2</button>
+    <button class="optBtn" data-n="3">3</button>
+  </div>
+  <button class="bigBtn" id="btnStart">▶ Mulai Permainan</button>
+  <div class="rulesBox">
+    <b>Cara main singkat:</b> klik kartu di tanganmu, lalu klik sel biru yang menyala di papan.
+    Tekan <b>R</b> (atau tombol Rotasi) untuk memutar kartu. Jika tidak ada sel biru, tekan <b>Ambil Kartu</b>.
+    Pemain pertama yang menghabiskan kartu menang. Jika buntu, nilai kartu tersisa terendah menang.
+  </div>
+</div>
+
+<!-- LAYAR PERMAINAN -->
+<div id="gameScreen">
+  <div id="topBar">
+    <span class="pill" id="turnPill">Giliran: Kamu</span>
+    <span class="pill">Tumpukan Tarik: <b id="pileCount">0</b></span>
+    <span class="pill" id="aiInfo"></span>
+  </div>
+
+  <div id="boardWrap"><div id="board"></div></div>
+
+  <div id="handArea"></div>
+
+  <div id="ctrlBar">
+    <button class="ctrlBtn gray" id="btnRotate">↻ Rotasi (R)</button>
+    <button class="ctrlBtn primary" id="btnDraw" disabled>Ambil Kartu</button>
+    <button class="ctrlBtn gray" id="btnRestart">↺ Ulang</button>
+  </div>
+
+  <div id="log"></div>
+</div>
+
+<!-- OVERLAY HASIL -->
+<div id="overlay">
+  <div class="box">
+    <h2 id="ovTitle"></h2>
+    <div id="ovBody"></div>
+    <br>
+    <button class="bigBtn" id="btnAgain">Main Lagi</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= DATA ================= */
+const COLORS = [
+  {n:"Putih",  h:"#EDEDED", t:"#000"},
+  {n:"Biru",   h:"#1F6FEB", t:"#fff"},
+  {n:"Kuning", h:"#F2B705", t:"#000"},
+  {n:"Hijau",  h:"#2E9E44", t:"#fff"},
+  {n:"Ungu",   h:"#8B3FD1", t:"#fff"},
+  {n:"Merah",  h:"#D6373A", t:"#fff"},
+  {n:"Hitam",  h:"#1A1A1A", t:"#fff"},
+];
+const VAL = [1,2,3,4,5,6,7];
+
+/* ================= DECK 210 KARTU =================
+   Semua 4-warna-berbeda dari 7 warna: C(7,4)=35 kombinasi
+   × 6 susunan unik modulo rotasi (TL tetap, permutasi 3 lainnya) */
+function perms(a){
+  if(a.length <= 1) return [a.slice()];
+  const r = [];
+  for(let i=0;i<a.length;i++){
+    const rest = a.slice(0,i).concat(a.slice(i+1));
+    for(const p of perms(rest)) r.push([a[i]].concat(p));
+  }
+  return r;
+}
+function buildDeck(){
+  const deck = [];
+  const idx = [0,1,2,3,4,5,6];
+  (function comb(start, combo){
+    if(combo.length === 4){
+      for(const p of perms(combo.slice(1))) deck.push([combo[0], p[0], p[1], p[2]]);
+      return;
+    }
+    for(let i=start;i<idx.length;i++){ combo.push(idx[i]); comb(i+1, combo); combo.pop(); }
+  })(0, []);
+  return deck; // 210 kartu
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+const rotCW = q => [q[3], q[0], q[1], q[2]]; // putar 90° searah jarum jam
+function rotated(q, r){ let x=q.slice(); for(let i=0;i<r;i++) x=rotCW(x); return x; }
+function cardValue(q){ return q.reduce((s,c)=>s+VAL[c], 0); }
+
+/* Sisi kartu q=[TL,TR,BR,BL], tiap sisi = pasangan berurutan 2 warna */
+function edges(q){
+  return { N:[q[0],q[1]], E:[q[1],q[2]], S:[q[3],q[2]], W:[q[0],q[3]] };
+}
+
+/* ================= STATE ================= */
+let S = null; // {hands:[], draw:[], board:Map, turn, nPlayers, locked, selected, selRot}
+const key = (x,y) => x+","+y;
+const DIRS = { N:[0,-1], E:[1,0], S:[0,1], W:[-1,0] };
+const OPP  = { N:"S", E:"W", S:"N", W:"E" };
+
+function newGame(nAI){
+  const deck = shuffle(buildDeck());
+  const n = nAI + 1;
+  const hands = [];
+  for(let i=0;i<n;i++) hands.push(deck.splice(0,8).sort((a,b)=>cardValue(b)-cardValue(a)));
+  const board = new Map();
+  board.set(key(0,0), { q: deck.shift(), byAI: false }); // kartu fondasi
+  S = { hands, draw: deck, board, turn: 0, n, locked: false, selected: -1, selRot: 0 };
+  log("Kartu fondasi dibuka. Permainan dimulai!");
+  renderAll();
+}
+
+/* ================= ATURAN ================= */
+function canPlace(x, y, q){
+  let contacts = 0;
+  for(const d in DIRS){
+    const nb = S.board.get(key(x+DIRS[d][0], y+DIRS[d][1]));
+    if(nb){
+      contacts++;
+      const me = edges(q)[d], them = edges(nb.q)[OPP[d]];
+      if(me[0]!==them[0] || me[1]!==them[1]) return 0;
+    }
+  }
+  return contacts;
+}
+/* semua langkah legal: {card, x, y, rot, contacts} */
+function legalMoves(hand){
+  const out = [];
+  const cand = new Set();
+  for(const k of S.board.keys()){
+    const [bx,by] = k.split(",").map(Number);
+    for(const d in DIRS){
+      const nx=bx+DIRS[d][0], ny=by+DIRS[d][1], nk=key(nx,ny);
+      if(!S.board.has(nk)) cand.add(nk);
+    }
+  }
+  hand.forEach((card, ci)=>{
+    for(const ck of cand){
+      const [x,y] = ck.split(",").map(Number);
+      for(let rot=0; rot<4; rot++){
+        const q = rotated(card, rot);
+        const c = canPlace(x, y, q);
+        if(c) out.push({ ci, x, y, rot, q, contacts: c });
+      }
+    }
+  });
+  return out;
+}
+
+/* ================= RENDER ================= */
+const boardEl = document.getElementById("board");
+const handEl  = document.getElementById("handArea");
+
+// PERBAIKAN: urutan grid disesuaikan dengan [TL, TR, BL, BR]
+function cardHTML(q, cls, style){
+  return '<div class="'+cls+'" '+(style||"")+'>'+
+    // Baris 1: Kiri Atas (TL), Kanan Atas (TR)
+    '<div class="q" style="background:'+COLORS[q[0]].h+'"></div>'+
+    '<div class="q" style="background:'+COLORS[q[1]].h+'"></div>'+
+    // Baris 2: Kiri Bawah (BL), Kanan Bawah (BR)
+    // PERHATIKAN: Kita tukar posisi q[3] dan q[2] agar sesuai grid
+    '<div class="q" style="background:'+COLORS[q[3]].h+'"></div>'+
+    '<div class="q" style="background:'+COLORS[q[2]].h+'"></div>'+
+  '</div>';
+}
+
+function renderBoard(){
+  const cells = [...S.board.keys()].map(k=>k.split(",").map(Number));
+  const legalSet = new Set();
+  if(S.selected >= 0 && !S.locked){
+    for(const m of legalMoves([S.hands[0][S.selected]])) legalSet.add(key(m.x,m.y));
+  }
+  let xs = cells.map(c=>c[0]), ys = cells.map(c=>c[1]);
+  for(const k of legalSet){ const [x,y]=k.split(",").map(Number); xs.push(x); ys.push(y); }
+  const minX=Math.min(...xs)-1, maxX=Math.max(...xs)+1, minY=Math.min(...ys)-1, maxY=Math.max(...ys)+1;
+  boardEl.style.width  = ((maxX-minX+1)*76)+"px";
+  boardEl.style.height = ((maxY-minY+1)*76)+"px";
+  let h = "";
+  for(let y=minY;y<=maxY;y++) for(let x=minX;x<=maxX;x++){
+    const k = key(x,y), px=(x-minX)*76, py=(y-minY)*76;
+    if(S.board.has(k)){
+      h += cardHTML(S.board.get(k).q, "card", 'style="left:'+px+'px;top:'+py+'px"');
+    } else {
+      const lg = legalSet.has(k);
+      h += '<div class="cellEmpty'+(lg?" legal":"")+'" data-x="'+x+'" data-y="'+y+'" style="left:'+px+'px;top:'+py+'px"></div>';
+    }
+  }
+  boardEl.innerHTML = h;
+  boardEl.querySelectorAll(".cellEmpty.legal").forEach(el=>{
+    el.onclick = ()=> onCellClick(+el.dataset.x, +el.dataset.y);
+  });
+}
+function renderHand(){
+  let h = "";
+  S.hands[0].forEach((c,i)=>{
+    h += cardHTML(rotated(c, i===S.selected ? S.selRot : 0), "handCard"+(i===S.selected?" selected":""), 'data-i="'+i+'"');
+  });
+  handEl.innerHTML = h;
+  handEl.querySelectorAll(".handCard").forEach(el=>{
+    el.onclick = ()=> onHandClick(+el.dataset.i);
+  });
+}
+function renderStatus(){
+  document.getElementById("pileCount").textContent = S.draw.length;
+  const pill = document.getElementById("turnPill");
+  if(S.locked){ pill.textContent = "Giliran: Komputer…"; pill.className="pill turn"; }
+  else { pill.textContent = "Giliran: Kamu"; pill.className="pill turn"; }
+  let ai = "";
+  for(let i=1;i<S.n;i++) ai += "AI"+i+": "+S.hands[i].length+" kartu · ";
+  document.getElementById("aiInfo").textContent = ai.slice(0,-3);
+  // tombol ambil: hanya jika tak bisa pasang
+  const canMove = legalMoves(S.hands[0]).length > 0;
+  const btn = document.getElementById("btnDraw");
+  if(S.locked){ btn.disabled = true; }
+  else if(canMove){ btn.disabled = true; btn.textContent = "Ambil Kartu"; }
+  else if(S.draw.length > 0){ btn.disabled = false; btn.textContent = "🂠 Ambil Kartu ("+S.draw.length+")"; }
+  else { btn.disabled = false; btn.textContent = "Pass"; }
+}
+function renderAll(){ renderBoard(); renderHand(); renderStatus(); }
+function log(msg, who){
+  const el = document.getElementById("log");
+  const w = who==="k" ? '<b class="kamu">Kamu</b>' : who==="a" ? '<b class="ai">Komputer</b>' : null;
+  el.insertAdjacentHTML("afterbegin", "<p>"+(w?w+" ": "")+msg+"</p>");
+  while(el.children.length > 40) el.lastChild.remove();
+}
+
+/* ================= INTERAKSI PEMAIN ================= */
+function onHandClick(i){
+  if(S.locked) return;
+  if(S.selected === i){ S.selected = -1; }
+  else { S.selected = i; S.selRot = 0; }
+  renderAll();
+}
+function onCellClick(x, y){
+  if(S.locked || S.selected < 0) return;
+  const card = S.hands[0][S.selected];
+  const q = rotated(card, S.selRot);
+  if(canPlace(x, y, q) > 0){
+    S.board.set(key(x,y), { q, byAI:false });
+    S.hands[0].splice(S.selected, 1);
+    S.selected = -1;
+    log("memasang kartu di ("+x+","+y+").", "k");
+    endTurn(0);
+  }
+}
+function rotateSel(){
+  if(S.locked || S.selected < 0) return;
+  S.selRot = (S.selRot + 1) % 4;
+  renderAll();
+}
+document.getElementById("btnRotate").onclick = rotateSel;
+document.addEventListener("keydown", e=>{
+  if(e.key.toLowerCase()==="r") rotateSel();
+});
+document.getElementById("btnDraw").onclick = ()=>{
+  if(S.locked) return;
+  const canMove = legalMoves(S.hands[0]).length > 0;
+  if(canMove) return; // hanya boleh ambil jika tak bisa pasang
+  if(S.draw.length > 0){
+    const c = S.draw.shift();
+    S.hands[0].push(c);
+    log("mengambil 1 kartu.", "k");
+  } else {
+    log("tumpukan habis — pass.", "k");
+  }
+  endTurn(0);
+};
+document.getElementById("btnRestart").onclick = ()=>{
+  document.getElementById("gameScreen").style.display = "none";
+  document.getElementById("startScreen").style.display = "flex";
+};
+
+/* ================= GILIRAN & AI ================= */
+function endTurn(pi){
+  renderAll();
+  // cek menang langsung
+  if(S.hands[pi].length === 0){ return gameOver([pi], "menang"); }
+  // cek buntu
+  if(S.draw.length === 0){
+    let anyMove = false;
+    for(let i=0;i<S.n;i++) if(legalMoves(S.hands[i]).length > 0){ anyMove = true; break; }
+    if(!anyMove) return stalemate();
+  }
+  S.turn = (pi + 1) % S.n;
+  if(S.turn === 0){ S.locked = false; renderAll(); }
+  else { S.locked = true; renderAll(); setTimeout(()=>aiTurn(S.turn), 700 + Math.random()*600); }
+}
+
+function aiTurn(pi){
+  const hand = S.hands[pi];
+  const moves = legalMoves(hand);
+  if(moves.length > 0){
+    // heuristik: utamakan langkah dengan kontak terbanyak, acak sisanya
+    moves.sort((a,b)=> b.contacts - a.contacts);
+    const best = moves.filter(m=> m.contacts === moves[0].contacts);
+    const m = best[Math.floor(Math.random()*best.length)];
+    S.board.set(key(m.x,m.y), { q: m.q, byAI: true });
+    hand.splice(m.ci, 1);
+    log("AI"+pi+" memasang kartu di ("+m.x+","+m.y+")" + (m.contacts>1 ? " — menyentuh "+m.contacts+" kartu!" : "") + ".", "a");
+  } else if(S.draw.length > 0){
+    hand.push(S.draw.shift());
+    log("AI"+pi+" mengambil 1 kartu.", "a");
+  } else {
+    log("AI"+pi+" pass (tumpukan habis).", "a");
+  }
+  endTurn(pi);
+}
+
+/* ================= AKHIR PERMAINAN ================= */
+function gameOver(winners, reason){
+  S.locked = true;
+  const names = i => i===0 ? "Kamu" : "Komputer "+i;
+  let title, body = "";
+  if(winners.includes(0)){
+    title = "🏆 Kamu Menang!";
+    body += "<p>Seluruh kartu kamu habis — kemenangan langsung (<i>shedding</i>).</p>";
+  } else {
+    title = "😔 Komputer Menang";
+    body += "<p>"+winners.map(names).join(" & ")+" menghabiskan kartu lebih dulu.</p>";
+  }
+  showOverlay(title, body);
+}
+function stalemate(){
+  S.locked = true;
+  const totals = S.hands.map(h => h.reduce((s,c)=> s + cardValue(c), 0));
+  const min = Math.min(...totals);
+  const winners = totals.map((t,i)=>[t,i]).filter(x=>x[0]===min).map(x=>x[1]);
+  const names = i => i===0 ? "Kamu" : "Komputer "+i;
+  let title, body = "<p><b>Kondisi buntu</b> — tumpukan habis & tak ada yang bisa memasang.</p><p>Total nilai kartu tersisa:</p>";
+  totals.forEach((t,i)=> body += "<p>"+names(i)+": <b>"+t+"</b>"+(t===min?" 🏆":"")+"</p>");
+  if(winners.includes(0) && winners.length===1) title = "🏆 Kamu Menang (Nilai Terendah)!";
+  else if(winners.length > 1 && winners.includes(0)) title = "🤝 Menang Bersama!";
+  else title = "😔 "+names(winners[0])+" Menang (Nilai Terendah)";
+  showOverlay(title, body);
+}
+function showOverlay(title, body){
+  document.getElementById("ovTitle").innerHTML = title;
+  document.getElementById("ovBody").innerHTML = body;
+  document.getElementById("overlay").style.display = "flex";
+}
+document.getElementById("btnAgain").onclick = ()=>{
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("gameScreen").style.display = "none";
+  document.getElementById("startScreen").style.display = "flex";
+};
+
+/* ================= MULAI ================= */
+let nAI = 1;
+document.querySelectorAll(".optBtn").forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll(".optBtn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    nAI = +b.dataset.n;
+  };
+});
+document.getElementById("btnStart").onclick = ()=>{
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("gameScreen").style.display = "flex";
+  document.getElementById("log").innerHTML = "";
+  newGame(nAI);
+};
+
+// Uji deck: harus 210 kartu unik
+(function test(){
+  const d = buildDeck();
+  const seen = new Set(d.map(c=>c.join("-")));
+  console.log("Deck:", d.length, "unique:", seen.size);
+})();
+</script>
+</body>
+</html>
