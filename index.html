@@ -3,139 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QUADRAN ZTRATAX — Player vs Komputer</title>
+<title>QUADRAN ZTRATAX - Meja Permainan</title>
 <style>
   :root{
-    --accent:#1F6FEB; --primary:#1A1A1A; --bg:#F6F8FA; --panel:#FFFFFF;
+    --accent:#1F6FEB; --primary:#1A1A1A; --bg:#2B2B2B; --panel:#FFFFFF;
     --border:#D0D7DE; --text:#24292F; --danger:#D6373A; --ok:#2E9E44;
+    --table:#3E7C4F; --table-border:#2B5A36;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   body{
     font-family:'Segoe UI', Arial, sans-serif; background:var(--bg); color:var(--text);
     min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:12px;
   }
-  h1{font-size:20px; letter-spacing:2px; color:var(--primary); text-align:center;}
-  .subtitle{font-size:12px; color:var(--accent); font-weight:600; text-align:center; margin-bottom:10px;}
+  h1{font-size:24px; letter-spacing:3px; color:#fff; text-align:center; margin-top:5px; text-shadow:2px 2px 4px rgba(0,0,0,.5);}
+  .subtitle{font-size:12px; color:#ccc; font-weight:600; text-align:center; margin-bottom:10px;}
 
   /* ---------- LAYAR AWAL ---------- */
-  #startScreen{display:flex; flex-direction:column; align-items:center; gap:16px; margin-top:8vh;
-    background:var(--panel); padding:32px; border-radius:12px; box-shadow:0 4px 14px rgba(0,0,0,.1); max-width:420px; width:100%;}
-  #startScreen h2{font-size:16px;}
-  .optRow{display:flex; gap:8px;}
-  .optBtn{padding:10px 18px; border:2px solid var(--border); border-radius:8px; background:#fff;
-    font-weight:700; cursor:pointer; font-size:15px;}
-  .optBtn.active{border-color:var(--accent); background:#F0F6FC; color:var(--accent);}
-  .bigBtn{padding:12px 34px; background:var(--accent); color:#fff; border:none; border-radius:30px;
-    font-size:16px; font-weight:700; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.18);}
+  #startScreen{display:flex; flex-direction:column; align-items:center; gap:18px; margin-top:6vh;
+    background:var(--panel); padding:35px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3); max-width:450px; width:100%;}
+  #startScreen h2{font-size:18px; margin-bottom:10px;}
+  .modeOption{
+    display:flex; justify-content:center; gap:12px; margin-bottom:20px;
+  }
+  .modeBtn{
+    padding:12px 20px; border:2px solid var(--border); border-radius:10px; background:#f8f9fa;
+    font-weight:700; cursor:pointer; font-size:15px; transition:all .2s;
+  }
+  .modeBtn.active{border-color:var(--accent); background:#e8f0fe; color:var(--accent); box-shadow:0 2px 6px rgba(31,111,235,.2);}
+  .bigBtn{padding:14px 36px; background:var(--accent); color:#fff; border:none; border-radius:30px;
+    font-size:16px; font-weight:700; cursor:pointer; box-shadow:0 6px 12px rgba(0,0,0,.2);}
   .bigBtn:hover{filter:brightness(1.1);}
-  .bigBtn:disabled{opacity:.4; cursor:not-allowed;}
-  .rulesBox{font-size:12px; line-height:1.6; background:#FAFAFA; border:1px dashed var(--border);
-    border-radius:8px; padding:12px;}
+  .rulesBox{font-size:12px; line-height:1.6; background:#fafafa; border:1px dashed var(--border); border-radius:8px; padding:14px; text-align:left;}
   .rulesBox b{color:var(--primary);}
 
   /* ---------- PAPAN PERMAINAN ---------- */
-  #gameScreen{display:none; width:100%; max-width:980px; flex-direction:column; align-items:center;}
-  #topBar{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; width:100%;
-    background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:8px 12px; margin-bottom:10px; font-size:13px;}
-  .pill{background:#F0F6FC; border:1px solid var(--border); border-radius:20px; padding:4px 12px; font-weight:600;}
-  .pill.turn{border-color:var(--accent); color:var(--accent);}
-  #boardWrap{width:100%; overflow:auto; background:var(--panel); border:1px solid var(--border);
-    border-radius:10px; padding:14px; display:flex; justify-content:center; min-height:200px; max-height:52vh;}
+  #gameScreen{display:none; width:100%; max-width:1100px; flex-direction:column; align-items:center;}
+  
+  /* Layout meja */
+  #table{
+    width:100%; background:var(--table); border:6px solid var(--table-border); border-radius:20px;
+    padding:15px; box-shadow:inset 0 0 30px rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.4);
+  }
+  
+  #opponentArea{display:flex; flex-direction:column; align-items:center; margin-bottom:10px;}
+  #opponentInfo{color:#fff; font-size:14px; margin-bottom:5px; text-shadow:1px 1px 2px black; font-weight:bold;}
+  
+  #boardWrap{width:100%; overflow:auto; background:rgba(0,0,0,0.2); border-radius:10px; padding:15px; display:flex; justify-content:center; min-height:230px; max-height:45vh;}
   #board{position:relative;}
-
-  .cellEmpty{position:absolute; width:76px; height:76px; border:1px dashed #E5E8EC; border-radius:6px;}
-  .cellEmpty.legal{cursor:pointer; background:#EAF3FF; border:2px solid var(--accent); animation:pulse 1s infinite;}
-  .cellEmpty.legal:hover{background:#D6E8FF;}
-  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,235,.4);}50%{box-shadow:0 0 0 6px rgba(31,111,235,0);}}
-
-  .card{position:absolute; width:76px; height:76px; display:grid; grid-template-columns:1fr 1fr;
-    grid-template-rows:1fr 1fr; border:1.5px solid var(--primary); border-radius:6px; overflow:hidden;
-    background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.15);}
+  
+  .cellEmpty{position:absolute; width:70px; height:70px; border:1px dashed rgba(255,255,255,.6); border-radius:6px;}
+  .cellEmpty.legal{cursor:pointer; background:rgba(31,111,235,.5); border:2px solid var(--accent); animation:pulse 1s infinite;}
+  .cellEmpty.legal:hover{background:rgba(31,111,235,.7);}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,235,.6);}50%{box-shadow:0 0 0 8px rgba(31,111,235,0);}}
+  
+  .card{position:absolute; width:70px; height:70px; display:grid; grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr; border:2px solid var(--primary); border-radius:6px; overflow:hidden;
+    background:#fff; box-shadow:0 4px 8px rgba(0,0,0,.3);}
   .card .q{width:100%; height:100%;}
-
-  /* ANIMASI POP-IN UNTUK KARTU BARU */
+  
   @keyframes popIn {
     0% { transform: scale(0) rotate(-10deg); opacity: 0; }
     60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  .card.placing {
-    animation: popIn 0.35s ease-out;
-  }
-
-  /* ---------- TANGAN PEMAIN ---------- */
-  #handArea{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0; min-height:70px;}
-  .handCard{width:64px; height:64px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
+  .card.placing{ animation: popIn 0.35s ease-out; }
+  
+  /* Tangan pemain */
+  .handSection{margin:10px 0;}
+  .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:5px; text-align:center; text-shadow:1px 1px 2px black;}
+  #handPlayer1{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
+  #handPlayer2{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
+  
+  .handCard{width:60px; height:60px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
     border:2px solid var(--primary); border-radius:6px; overflow:hidden; cursor:pointer; background:#fff;
-    box-shadow:0 2px 5px rgba(0,0,0,.15); transition:transform .15s ease, box-shadow .15s ease;}
-  .handCard:hover{transform:translateY(-4px); box-shadow:0 6px 12px rgba(0,0,0,.15);}
-  .handCard.selected{outline:3px solid var(--accent); transform:translateY(-8px) scale(1.06);}
-
-  /* ANIMASI ROTASI PADA KARTU DI TANGAN */
+    box-shadow:0 4px 8px rgba(0,0,0,.25); transition:transform .15s ease, box-shadow .15s ease;}
+  .handCard:hover{transform:translateY(-4px); box-shadow:0 8px 14px rgba(0,0,0,.3);}
+  .handCard.selected{outline:3px solid var(--accent); transform:translateY(-8px) scale(1.08);}
+  
   .handCard.rotating {
     transition: transform 0.3s ease;
     transform: rotate(90deg);
   }
-
-  /* ---------- KONTROL ---------- */
-  #ctrlBar{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:10px;}
-  .ctrlBtn{padding:10px 18px; border:none; border-radius:24px; font-weight:700; font-size:14px; cursor:pointer;}
+  
+  /* Kontrol tombol per pemain */
+  .ctrlBar{display:flex; gap:8px; justify-content:center; margin-top:8px;}
+  .ctrlBtn{padding:8px 14px; border:none; border-radius:20px; font-weight:700; font-size:13px; cursor:pointer; transition:filter .2s;}
   .ctrlBtn.primary{background:var(--accent); color:#fff;}
-  .ctrlBtn.gray{background:#E7EAEE; color:var(--text);}
-  .ctrlBtn:disabled{opacity:.35; cursor:not-allowed;}
-
-  /* ---------- LOG & OVERLAY ---------- */
-  #log{width:100%; max-height:110px; overflow-y:auto; background:var(--panel); border:1px solid var(--border);
-    border-radius:10px; padding:8px 12px; font-size:12px; line-height:1.6;}
+  .ctrlBtn.gray{background:#e0e0e0; color:#333;}
+  .ctrlBtn:disabled{opacity:.4; cursor:not-allowed;}
+  .ctrlBtn.primary:disabled{opacity:.4;}
+  
+  #log{width:100%; max-height:100px; overflow-y:auto; background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:10px 12px; font-size:12px; line-height:1.6; margin-top:10px;}
   #log p b.kamu{color:var(--accent);} #log p b.ai{color:var(--danger);}
-  #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:50;
+  
+  #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:50;
     align-items:center; justify-content:center;}
   #overlay .box{background:#fff; border-radius:14px; padding:30px 40px; text-align:center; max-width:90%;}
   #overlay h2{font-size:22px; margin-bottom:10px;}
   #overlay p{font-size:14px; margin-bottom:6px;}
-  @media (max-width:560px){ .card,.cellEmpty{width:60px;height:60px;} .handCard{width:52px;height:52px;} }
+  
+  @media (max-width:560px){
+    .card,.cellEmpty{width:56px;height:56px;} .handCard{width:50px;height:50px;}
+  }
 </style>
-<base target="_blank">
 </head>
 <body>
 
 <h1>QUADRAN ZTRATAX</h1>
-<div class="subtitle">Rulebook Resmi · Edisi 210 Kartu · Player vs Komputer</div>
+<div class="subtitle">Meja Permainan 2 Pemain · Top-Down</div>
 
 <!-- LAYAR AWAL -->
 <div id="startScreen">
-  <h2>Jumlah Lawan Komputer</h2>
-  <div class="optRow">
-    <button class="optBtn active" data-n="1">1</button>
-    <button class="optBtn" data-n="2">2</button>
-    <button class="optBtn" data-n="3">3</button>
+  <h2>Pilih Mode Permainan</h2>
+  <div class="modeOption">
+    <button class="modeBtn active" id="modePvP">👥 Player vs Player</button>
+    <button class="modeBtn" id="modePvE">🤖 Player vs Computer</button>
   </div>
   <button class="bigBtn" id="btnStart">▶ Mulai Permainan</button>
   <div class="rulesBox">
-    <b>Cara main singkat:</b> klik kartu di tanganmu, lalu klik sel biru yang menyala di papan.
-    Tekan <b>R</b> (atau tombol Rotasi) untuk memutar kartu. Jika tidak ada sel biru, tekan <b>Ambil Kartu</b>.
-    Pemain pertama yang menghabiskan kartu menang. Jika buntu, nilai kartu tersisa terendah menang.
+    <b>Cara main:</b> Klik kartu di tanganmu, lalu klik sel biru yang menyala di papan. Tekan <b>R</b> untuk rotasi kartu. Jika tidak ada sel biru, klik tombol <b>Ambil Kartu</b>. Pemain yang habis kartunya menang.
   </div>
 </div>
 
 <!-- LAYAR PERMAINAN -->
 <div id="gameScreen">
-  <div id="topBar">
-    <span class="pill" id="turnPill">Giliran: Kamu</span>
-    <span class="pill">Tumpukan Tarik: <b id="pileCount">0</b></span>
-    <span class="pill" id="aiInfo"></span>
+  <div id="table">
+    <!-- Area Player 2 / Komputer (atas) -->
+    <div id="opponentArea">
+      <div id="opponentInfo">Player 2 / Komputer</div>
+      <div class="handSection">
+        <div id="handPlayer2"></div>
+        <div class="ctrlBar" id="ctrlPlayer2">
+          <button class="ctrlBtn gray" id="btnRotate2">↻ Rotasi</button>
+          <button class="ctrlBtn primary" id="btnDraw2" disabled>Ambil Kartu</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Papan di tengah -->
+    <div id="boardWrap"><div id="board"></div></div>
+    
+    <!-- Area Player 1 (bawah) -->
+    <div id="player1Area">
+      <div class="handSection">
+        <div id="handPlayer1"></div>
+        <div class="ctrlBar" id="ctrlPlayer1">
+          <button class="ctrlBtn gray" id="btnRotate1">↻ Rotasi</button>
+          <button class="ctrlBtn primary" id="btnDraw1" disabled>Ambil Kartu</button>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div id="boardWrap"><div id="board"></div></div>
-
-  <div id="handArea"></div>
-
-  <div id="ctrlBar">
-    <button class="ctrlBtn gray" id="btnRotate">↻ Rotasi (R)</button>
-    <button class="ctrlBtn primary" id="btnDraw" disabled>Ambil Kartu</button>
-    <button class="ctrlBtn gray" id="btnRestart">↺ Ulang</button>
-  </div>
-
+  
   <div id="log"></div>
 </div>
 
@@ -198,20 +218,30 @@ function edges(q){
 }
 
 /* ================= STATE ================= */
-let S = null;
+let S = null; // { mode, hands:[], draw:[], board:Map, turn, locked, selected, selRot, newCard }
 const key = (x,y) => x+","+y;
 const DIRS = { N:[0,-1], E:[1,0], S:[0,1], W:[-1,0] };
 const OPP  = { N:"S", E:"W", S:"N", W:"E" };
 
-function newGame(nAI){
+function newGame(mode){
   const deck = shuffle(buildDeck());
-  const n = nAI + 1;
   const hands = [];
-  for(let i=0;i<n;i++) hands.push(deck.splice(0,8).sort((a,b)=>cardValue(b)-cardValue(a)));
+  for(let i=0;i<2;i++) hands.push(deck.splice(0,8).sort((a,b)=>cardValue(b)-cardValue(a)));
   const board = new Map();
   board.set(key(0,0), { q: deck.shift(), byAI: false });
-  S = { hands, draw: deck, board, turn: 0, n, locked: false, selected: -1, selRot: 0, newCard: null };
-  log("Kartu fondasi dibuka. Permainan dimulai!");
+  S = {
+    mode: mode, // 'pvp' atau 'pve'
+    hands, 
+    draw: deck, 
+    board, 
+    turn: 0, // 0 = Player1, 1 = Player2/Computer
+    locked: false, // khusus untuk menunggu AI
+    selected: -1,
+    selRot: 0,
+    newCard: null,
+    rotateTimeout: null
+  };
+  log("Permainan dimulai! Player 1 jalan pertama.");
   renderAll();
 }
 
@@ -228,6 +258,7 @@ function canPlace(x, y, q){
   }
   return contacts;
 }
+
 function legalMoves(hand){
   const out = [];
   const cand = new Set();
@@ -253,7 +284,9 @@ function legalMoves(hand){
 
 /* ================= RENDER ================= */
 const boardEl = document.getElementById("board");
-const handEl  = document.getElementById("handArea");
+const handP1El = document.getElementById("handPlayer1");
+const handP2El = document.getElementById("handPlayer2");
+const oppInfoEl = document.getElementById("opponentInfo");
 
 function cardHTML(q, cls, style){
   return '<div class="'+cls+'" '+(style||"")+'>'+
@@ -268,16 +301,22 @@ function renderBoard(){
   const cells = [...S.board.keys()].map(k=>k.split(",").map(Number));
   const legalSet = new Set();
   if(S.selected >= 0 && !S.locked){
-    for(const m of legalMoves([S.hands[0][S.selected]])) legalSet.add(key(m.x,m.y));
+    // Hanya untuk pemain yang sedang giliran
+    const curPlayer = S.turn;
+    if(curPlayer === 0) {
+      for(const m of legalMoves(S.hands[0])) legalSet.add(key(m.x,m.y));
+    } else {
+      for(const m of legalMoves(S.hands[1])) legalSet.add(key(m.x,m.y));
+    }
   }
   let xs = cells.map(c=>c[0]), ys = cells.map(c=>c[1]);
   for(const k of legalSet){ const [x,y]=k.split(",").map(Number); xs.push(x); ys.push(y); }
   const minX=Math.min(...xs)-1, maxX=Math.max(...xs)+1, minY=Math.min(...ys)-1, maxY=Math.max(...ys)+1;
-  boardEl.style.width  = ((maxX-minX+1)*76)+"px";
-  boardEl.style.height = ((maxY-minY+1)*76)+"px";
+  boardEl.style.width  = ((maxX-minX+1)*70)+"px";
+  boardEl.style.height = ((maxY-minY+1)*70)+"px";
   let h = "";
   for(let y=minY;y<=maxY;y++) for(let x=minX;x<=maxX;x++){
-    const k = key(x,y), px=(x-minX)*76, py=(y-minY)*76;
+    const k = key(x,y), px=(x-minX)*70, py=(y-minY)*70;
     if(S.board.has(k)){
       let cls = "card";
       if(S.newCard === k) cls += " placing";
@@ -288,167 +327,218 @@ function renderBoard(){
     }
   }
   boardEl.innerHTML = h;
-  // Reset penanda kartu baru setelah render (agar animasi tidak berulang)
   S.newCard = null;
   boardEl.querySelectorAll(".cellEmpty.legal").forEach(el=>{
     el.onclick = ()=> onCellClick(+el.dataset.x, +el.dataset.y);
   });
 }
-function renderHand(){
-  let h = "";
+
+function renderHands(){
+  // Player 1
+  let h1 = "";
   S.hands[0].forEach((c,i)=>{
-    h += cardHTML(rotated(c, i===S.selected ? S.selRot : 0), "handCard"+(i===S.selected?" selected":""), 'data-i="'+i+'"');
+    h1 += cardHTML(rotated(c, (S.turn===0 && S.selected===i) ? S.selRot : 0), "handCard"+(S.turn===0 && S.selected===i?" selected":""), 'data-i="'+i+'"');
   });
-  handEl.innerHTML = h;
-  handEl.querySelectorAll(".handCard").forEach(el=>{
-    el.onclick = ()=> onHandClick(+el.dataset.i);
+  handP1El.innerHTML = h1;
+  handP1El.querySelectorAll(".handCard").forEach(el=>{
+    el.onclick = ()=> onHandClick(0, +el.dataset.i);
   });
+  
+  // Player 2 / Komputer
+  let h2 = "";
+  S.hands[1].forEach((c,i)=>{
+    // Kartu lawan selalu terbuka
+    h2 += cardHTML(rotated(c, (S.turn===1 && S.selected===i) ? S.selRot : 0), "handCard"+(S.turn===1 && S.selected===i?" selected":""), 'data-i="'+i+'"');
+  });
+  handP2El.innerHTML = h2;
+  if(S.mode === 'pvp') {
+    handP2El.querySelectorAll(".handCard").forEach(el=>{
+      el.onclick = ()=> onHandClick(1, +el.dataset.i);
+    });
+  }
 }
+
 function renderStatus(){
-  document.getElementById("pileCount").textContent = S.draw.length;
-  const pill = document.getElementById("turnPill");
-  if(S.locked){ pill.textContent = "Giliran: Komputer…"; pill.className="pill turn"; }
-  else { pill.textContent = "Giliran: Kamu"; pill.className="pill turn"; }
-  let ai = "";
-  for(let i=1;i<S.n;i++) ai += "AI"+i+": "+S.hands[i].length+" kartu · ";
-  document.getElementById("aiInfo").textContent = ai.slice(0,-3);
-  const canMove = legalMoves(S.hands[0]).length > 0;
-  const btn = document.getElementById("btnDraw");
-  if(S.locked){ btn.disabled = true; }
-  else if(canMove){ btn.disabled = true; btn.textContent = "Ambil Kartu"; }
-  else if(S.draw.length > 0){ btn.disabled = false; btn.textContent = "🂠 Ambil Kartu ("+S.draw.length+")"; }
-  else { btn.disabled = false; btn.textContent = "Pass"; }
+  const pile = document.getElementById("boardWrap");
+  // Update informasi giliran
+  const turnLabel = (S.turn === 0) ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer");
+  document.getElementById("opponentInfo").textContent = (S.mode==='pvp' ? "Player 2" : "Komputer") + " (" + S.hands[1].length + " kartu)";
+  // Tambahkan indikator giliran di log? Tidak perlu.
+  
+  // Tombol ambil untuk masing-masing pemain
+  const btn1 = document.getElementById("btnDraw1");
+  const btn2 = document.getElementById("btnDraw2");
+  
+  if(S.locked){
+    btn1.disabled = true; btn2.disabled = true;
+    btn1.textContent = "Ambil Kartu"; btn2.textContent = "Ambil Kartu";
+  } else {
+    // Player 1
+    const canMove1 = legalMoves(S.hands[0]).length > 0;
+    if(S.turn === 0){
+      btn1.disabled = canMove1 || S.draw.length === 0;
+      btn1.textContent = canMove1 ? "Ambil Kartu" : (S.draw.length > 0 ? "🂠 Ambil Kartu ("+S.draw.length+")" : "Pass");
+      btn2.disabled = true;
+    } else {
+      btn2.disabled = legalMoves(S.hands[1]).length > 0 || S.draw.length === 0;
+      btn2.textContent = legalMoves(S.hands[1]).length > 0 ? "Ambil Kartu" : (S.draw.length > 0 ? "🂠 Ambil Kartu ("+S.draw.length+")" : "Pass");
+      btn1.disabled = true;
+    }
+  }
 }
-function renderAll(){ renderBoard(); renderHand(); renderStatus(); }
+
+function renderAll(){ renderBoard(); renderHands(); renderStatus(); }
+
 function log(msg, who){
   const el = document.getElementById("log");
-  const w = who==="k" ? '<b class="kamu">Kamu</b>' : who==="a" ? '<b class="ai">Komputer</b>' : null;
+  const w = who==="p1" ? '<b class="kamu">P1</b>' : who==="p2" ? '<b class="ai">P2</b>' : null;
   el.insertAdjacentHTML("afterbegin", "<p>"+(w?w+" ": "")+msg+"</p>");
   while(el.children.length > 40) el.lastChild.remove();
 }
 
-/* ================= INTERAKSI PEMAIN ================= */
-function onHandClick(i){
+/* ================= INTERAKSI ================= */
+function onHandClick(pid, i){
   if(S.locked) return;
+  if(S.turn !== pid) return; // bukan giliran pemain ini
   if(S.selected === i){ S.selected = -1; }
   else { S.selected = i; S.selRot = 0; }
   renderAll();
 }
+
 function onCellClick(x, y){
   if(S.locked || S.selected < 0) return;
-  const card = S.hands[0][S.selected];
+  const pid = S.turn;
+  const card = S.hands[pid][S.selected];
   const q = rotated(card, S.selRot);
   if(canPlace(x, y, q) > 0){
-    S.board.set(key(x,y), { q, byAI:false });
-    S.newCard = key(x,y); // Tandai kartu baru untuk animasi
-    S.hands[0].splice(S.selected, 1);
+    S.board.set(key(x,y), { q, byAI: (pid===1 && S.mode==='pve') });
+    S.newCard = key(x,y);
+    S.hands[pid].splice(S.selected, 1);
     S.selected = -1;
-    log("memasang kartu di ("+x+","+y+").", "k");
-    endTurn(0);
+    log("memasang kartu di ("+x+","+y+").", pid===0 ? "p1" : "p2");
+    endTurn(pid);
   }
 }
 
-/* Rotasi dengan animasi */
-let rotateTimeout = null;
-function rotateSel(){
-  if(S.locked || S.selected < 0) return;
-  // Ambil elemen kartu yang sedang dipilih
+function handleRotate(pid){
+  if(S.locked || S.turn !== pid || S.selected < 0) return;
+  const handEl = pid === 0 ? handP1El : handP2El;
   const selectedEl = handEl.querySelector(".handCard.selected");
   if(!selectedEl) return;
-  // Tambahkan class rotating (CSS akan memutar 90°)
   selectedEl.classList.add("rotating");
-  // Tunggu 300ms (durasi animasi) lalu update state dan re-render
-  clearTimeout(rotateTimeout);
-  rotateTimeout = setTimeout(()=>{
+  clearTimeout(S.rotateTimeout);
+  S.rotateTimeout = setTimeout(()=>{
     S.selRot = (S.selRot + 1) % 4;
     selectedEl.classList.remove("rotating");
     renderAll();
   }, 300);
 }
 
-document.getElementById("btnRotate").onclick = rotateSel;
+// Tombol rotasi per pemain
+document.getElementById("btnRotate1").onclick = ()=> handleRotate(0);
+document.getElementById("btnRotate2").onclick = ()=> handleRotate(1);
 document.addEventListener("keydown", e=>{
-  if(e.key.toLowerCase()==="r") rotateSel();
+  if(e.key.toLowerCase()==="r") handleRotate(S.turn);
 });
-document.getElementById("btnDraw").onclick = ()=>{
-  if(S.locked) return;
+
+// Tombol ambil kartu
+document.getElementById("btnDraw1").onclick = ()=>{
+  if(S.locked || S.turn !== 0) return;
   const canMove = legalMoves(S.hands[0]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
     const c = S.draw.shift();
     S.hands[0].push(c);
-    log("mengambil 1 kartu.", "k");
+    log("mengambil 1 kartu.", "p1");
   } else {
-    log("tumpukan habis — pass.", "k");
+    log("tumpukan habis — pass.", "p1");
   }
   endTurn(0);
 };
+document.getElementById("btnDraw2").onclick = ()=>{
+  if(S.locked || S.turn !== 1) return;
+  const canMove = legalMoves(S.hands[1]).length > 0;
+  if(canMove) return;
+  if(S.draw.length > 0){
+    const c = S.draw.shift();
+    S.hands[1].push(c);
+    log("mengambil 1 kartu.", "p2");
+  } else {
+    log("tumpukan habis — pass.", "p2");
+  }
+  endTurn(1);
+};
+
 document.getElementById("btnRestart").onclick = ()=>{
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("startScreen").style.display = "flex";
 };
 
-/* ================= GILIRAN & AI ================= */
+/* ================= GILIRAN ================= */
 function endTurn(pi){
   renderAll();
-  if(S.hands[pi].length === 0){ return gameOver([pi], "menang"); }
+  // Cek menang
+  if(S.hands[pi].length === 0){
+    const winnerNames = pi === 0 ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer");
+    showOverlay("🏆 "+winnerNames+" Menang!", "<p>Semua kartu telah habis.</p>");
+    S.locked = true;
+    return;
+  }
+  // Cek buntu
   if(S.draw.length === 0){
     let anyMove = false;
-    for(let i=0;i<S.n;i++) if(legalMoves(S.hands[i]).length > 0){ anyMove = true; break; }
-    if(!anyMove) return stalemate();
+    for(let i=0;i<2;i++) if(legalMoves(S.hands[i]).length > 0){ anyMove = true; break; }
+    if(!anyMove){
+      const totals = S.hands.map(h => h.reduce((s,c)=> s + cardValue(c), 0));
+      const min = Math.min(...totals);
+      const winners = totals.map((t,i)=>[t,i]).filter(x=>x[0]===min).map(x=>x[1]);
+      const names = i => i===0 ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer");
+      let body = "<p><b>Buntu!</b> Nilai kartu tersisa:</p>";
+      totals.forEach((t,i)=> body += "<p>"+names(i)+": <b>"+t+"</b>"+(t===min?" 🏆":"")+"</p>");
+      showOverlay("🤝 Permainan Berakhir", body);
+      S.locked = true;
+      return;
+    }
   }
-  S.turn = (pi + 1) % S.n;
-  if(S.turn === 0){ S.locked = false; renderAll(); }
-  else { S.locked = true; renderAll(); setTimeout(()=>aiTurn(S.turn), 700 + Math.random()*600); }
+  
+  // Pindah giliran
+  S.turn = (pi + 1) % 2;
+  S.selected = -1;
+  if(S.turn === 1 && S.mode === 'pve'){
+    // Komputer jalan
+    S.locked = true;
+    renderAll();
+    setTimeout(()=> aiTurn(), 800 + Math.random()*500);
+  } else {
+    // Player 1 atau PvP Player2 jalan
+    S.locked = false;
+    renderAll();
+    log("Giliran " + (S.turn === 0 ? "Player 1" : "Player 2") + ".", null);
+  }
 }
 
-function aiTurn(pi){
-  const hand = S.hands[pi];
+/* ================= AI KOMPUTER ================= */
+function aiTurn(){
+  const hand = S.hands[1];
   const moves = legalMoves(hand);
   if(moves.length > 0){
     moves.sort((a,b)=> b.contacts - a.contacts);
     const best = moves.filter(m=> m.contacts === moves[0].contacts);
     const m = best[Math.floor(Math.random()*best.length)];
     S.board.set(key(m.x,m.y), { q: m.q, byAI: true });
-    S.newCard = key(m.x,m.y); // Tandai kartu AI untuk animasi
+    S.newCard = key(m.x,m.y);
     hand.splice(m.ci, 1);
-    log("AI"+pi+" memasang kartu di ("+m.x+","+m.y+")" + (m.contacts>1 ? " — menyentuh "+m.contacts+" kartu!" : "") + ".", "a");
+    log("Komputer memasang kartu di ("+m.x+","+m.y+")" + (m.contacts>1 ? " — menyentuh "+m.contacts+" kartu!" : "") + ".", "p2");
   } else if(S.draw.length > 0){
     hand.push(S.draw.shift());
-    log("AI"+pi+" mengambil 1 kartu.", "a");
+    log("Komputer mengambil 1 kartu.", "p2");
   } else {
-    log("AI"+pi+" pass (tumpukan habis).", "a");
+    log("Komputer pass.", "p2");
   }
-  endTurn(pi);
+  endTurn(1);
 }
 
-/* ================= AKHIR PERMAINAN ================= */
-function gameOver(winners, reason){
-  S.locked = true;
-  const names = i => i===0 ? "Kamu" : "Komputer "+i;
-  let title, body = "";
-  if(winners.includes(0)){
-    title = "🏆 Kamu Menang!";
-    body += "<p>Seluruh kartu kamu habis — kemenangan langsung (<i>shedding</i>).</p>";
-  } else {
-    title = "😔 Komputer Menang";
-    body += "<p>"+winners.map(names).join(" & ")+" menghabiskan kartu lebih dulu.</p>";
-  }
-  showOverlay(title, body);
-}
-function stalemate(){
-  S.locked = true;
-  const totals = S.hands.map(h => h.reduce((s,c)=> s + cardValue(c), 0));
-  const min = Math.min(...totals);
-  const winners = totals.map((t,i)=>[t,i]).filter(x=>x[0]===min).map(x=>x[1]);
-  const names = i => i===0 ? "Kamu" : "Komputer "+i;
-  let title, body = "<p><b>Kondisi buntu</b> — tumpukan habis & tak ada yang bisa memasang.</p><p>Total nilai kartu tersisa:</p>";
-  totals.forEach((t,i)=> body += "<p>"+names(i)+": <b>"+t+"</b>"+(t===min?" 🏆":"")+"</p>");
-  if(winners.includes(0) && winners.length===1) title = "🏆 Kamu Menang (Nilai Terendah)!";
-  else if(winners.length > 1 && winners.includes(0)) title = "🤝 Menang Bersama!";
-  else title = "😔 "+names(winners[0])+" Menang (Nilai Terendah)";
-  showOverlay(title, body);
-}
+/* ================= OVERLAY ================= */
 function showOverlay(title, body){
   document.getElementById("ovTitle").innerHTML = title;
   document.getElementById("ovBody").innerHTML = body;
@@ -461,22 +551,20 @@ document.getElementById("btnAgain").onclick = ()=>{
 };
 
 /* ================= MULAI ================= */
-let nAI = 1;
-document.querySelectorAll(".optBtn").forEach(b=>{
-  b.onclick = ()=>{
-    document.querySelectorAll(".optBtn").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    nAI = +b.dataset.n;
-  };
-});
+let currentMode = 'pvp';
+const modePvP = document.getElementById("modePvP");
+const modePvE = document.getElementById("modePvE");
+modePvP.onclick = ()=>{ currentMode='pvp'; modePvP.classList.add("active"); modePvE.classList.remove("active"); };
+modePvE.onclick = ()=>{ currentMode='pve'; modePvE.classList.add("active"); modePvP.classList.remove("active"); };
+
 document.getElementById("btnStart").onclick = ()=>{
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("gameScreen").style.display = "flex";
   document.getElementById("log").innerHTML = "";
-  newGame(nAI);
+  newGame(currentMode);
 };
 
-// Uji deck: harus 210 kartu unik
+// Uji deck
 (function test(){
   const d = buildDeck();
   const seen = new Set(d.map(c=>c.join("-")));
