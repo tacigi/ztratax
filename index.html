@@ -147,7 +147,7 @@
   </div>
   <button class="bigBtn" id="btnStart">▶ Mulai Permainan</button>
   <div class="rulesBox">
-    <b>Cara main:</b> Klik kartu di tanganmu, lalu klik sel biru di papan. Atau <b>drag kartu</b> ke sel yang dituju. Jika tidak valid, kartu akan kembali. Tekan <b>R</b> untuk rotasi. Pemain yang habis kartunya menang.
+    <b>Cara main:</b> Klik kartu untuk memilih, lalu tekan R untuk rotasi. Atau drag kartu langsung ke sel papan. Jika tidak valid, kartu kembali. Pemain yang habis kartunya menang.
   </div>
 </div>
 
@@ -316,7 +316,6 @@ function legalMoves(hand){
 const boardEl = document.getElementById("board");
 const handP1El = document.getElementById("handPlayer1");
 const handP2El = document.getElementById("handPlayer2");
-const oppInfoEl = document.getElementById("opponentInfo");
 
 function cardHTML(q, cls, style){
   return '<div class="'+cls+'" '+(style||"")+'>'+
@@ -385,7 +384,6 @@ function renderHands(){
 }
 
 function renderStatus(){
-  const turnLabel = (S.turn === 0) ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer");
   document.getElementById("opponentInfo").textContent = (S.mode==='pvp' ? "Player 2" : "Komputer") + " (" + S.hands[1].length + " kartu)";
   
   const btn1 = document.getElementById("btnDraw1");
@@ -450,6 +448,7 @@ function attachDrag(el, pid, cardIndex){
   let dragCard = null;
   
   el.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
     if(S.locked || S.animating || S.turn !== pid) return;
     
     // Pilih kartu ini jika belum
@@ -463,20 +462,20 @@ function attachDrag(el, pid, cardIndex){
     startY = e.clientY;
     isDragging = false;
     
-    // Simpan elemen asli
-    el.dataset.dragging = "false";
+    // Ambil pointer capture agar event tetap diterima meski kursor keluar elemen
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch(err) {}
   });
   
   el.addEventListener('pointermove', (e) => {
     if(S.locked || S.animating || S.turn !== pid) return;
     
-    // Jika belum drag, cek apakah melewati threshold
     if(!isDragging){
       const dx = Math.abs(e.clientX - startX);
       const dy = Math.abs(e.clientY - startY);
       if(dx + dy > 5){
         isDragging = true;
-        el.dataset.dragging = "true";
         
         // Buat elemen ghost
         dragCard = document.createElement('div');
@@ -506,7 +505,7 @@ function attachDrag(el, pid, cardIndex){
     el.style.opacity = '1';
     
     if(!isDragging){
-      // Ini adalah klik biasa
+      // Ini adalah klik biasa - toggle seleksi
       onHandClick(pid, cardIndex);
       return;
     }
@@ -519,14 +518,19 @@ function attachDrag(el, pid, cardIndex){
     if(dragCard) dragCard.remove();
     dragCard = null;
     
-    // Cari sel target di bawah kursor
-    const boardCells = document.querySelectorAll('.cellEmpty');
+    // Cari elemen di bawah kursor
+    const targetElement = document.elementFromPoint(e.clientX, e.clientY);
     let targetCell = null;
-    for(const cell of boardCells){
-      const rect = cell.getBoundingClientRect();
-      if(e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom){
-        targetCell = cell;
-        break;
+    
+    // Cari parent .cellEmpty dari targetElement
+    if(targetElement){
+      let temp = targetElement;
+      while(temp && temp !== document.body){
+        if(temp.classList && temp.classList.contains('cellEmpty')){
+          targetCell = temp;
+          break;
+        }
+        temp = temp.parentElement;
       }
     }
     
@@ -583,7 +587,6 @@ function attachDrag(el, pid, cardIndex){
       dragCard = null;
       el.style.opacity = '1';
       isDragging = false;
-      el.dataset.dragging = "false";
       S.selected = -1;
       renderAll();
     }
