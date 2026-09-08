@@ -42,89 +42,106 @@
   }
   #opponentArea{display:flex; flex-direction:column; align-items:center; margin-bottom:10px;}
   #opponentInfo{color:#fff; font-size:14px; margin-bottom:5px; text-shadow:1px 1px 2px black; font-weight:bold;}
-  #boardWrap{width:100%; overflow:auto; background:rgba(0,0,0,0.2); border-radius:10px; padding:15px; display:flex; justify-content:center; min-height:230px; max-height:45vh;}
-  #board{position:relative;}
-  
+
+  #boardWrap{
+    width:100%;
+    overflow:hidden;
+    background:rgba(0,0,0,0.2);
+    border-radius:10px;
+    padding:15px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:230px;
+    max-height:45vh;
+    position: relative; /* Agar kontrol bisa absolute di dalamnya */
+  }
+  #board{position:relative; transform-origin: center center;}
+
   .cellEmpty{position:absolute; width:70px; height:70px; border:1px dashed rgba(255,255,255,.6); border-radius:6px;}
   .cellEmpty.legal{cursor:pointer; background:rgba(31,111,235,.5); border:2px solid var(--accent); animation:pulse 1s infinite;}
   .cellEmpty.legal:hover{background:rgba(31,111,235,.7);}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,235,.6);}50%{box-shadow:0 0 0 8px rgba(31,111,235,0);}}
-  
+
   .card{position:absolute; width:70px; height:70px; display:grid; grid-template-columns:1fr 1fr;
     grid-template-rows:1fr 1fr; border:2px solid var(--primary); border-radius:6px; overflow:hidden;
     background:#fff; box-shadow:0 4px 8px rgba(0,0,0,.3);}
   .card .q{width:100%; height:100%;}
-  
+
   @keyframes popIn {
     0% { transform: scale(0) rotate(-10deg); opacity: 0; }
     60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
   .card.placing{ animation: popIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  
-  /* Kartu terbang - lebih halus */
+
+  /* Kartu terbang */
   .flying-card{
-    position: fixed;
-    z-index: 1000;
-    pointer-events: none;
-    transition: left 0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
-                top  0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
-                transform 0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
-                opacity 0.55s ease;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    border: 2px solid var(--primary);
-    border-radius: 6px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    position: fixed; z-index: 1000; pointer-events: none;
+    transition: left 0.55s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
+                transform 0.55s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.55s ease;
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    border: 2px solid var(--primary); border-radius: 6px; overflow: hidden;
+    background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.4);
     will-change: left, top, transform, opacity;
   }
-  
+
   /* Kartu drag saat dipegang */
   .dragging-card{
-    position: fixed;
-    z-index: 1000;
-    pointer-events: none;
-    width: 60px;
-    height: 60px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    border: 2px solid var(--accent);
-    border-radius: 6px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 10px 20px rgba(0,0,0,.45);
-    transform: rotate(5deg) scale(1.1);
-    opacity: 0.95;
+    position: fixed; z-index: 1000; pointer-events: none;
+    width: 60px; height: 60px;
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    border: 2px solid var(--accent); border-radius: 6px; overflow: hidden;
+    background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,.45);
+    transform: rotate(5deg) scale(1.1); opacity: 0.95;
     transition: transform 0.2s ease;
   }
-  
+
   /* Tumpukan tarik */
   .draw-pile{
-    width: 70px;
-    height: 70px;
-    border: 2px dashed rgba(255,255,255,.7);
+    width: 70px; height: 70px;
+    border: 2px dashed rgba(255,255,255,.7); border-radius: 8px;
+    background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 2px black;
+    margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,.3);
+  }
+
+  /* ---------- KONTROL NAVIGASI & ZOOM ---------- */
+  #boardControls{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 35px);
+    gap: 4px;
+    background: rgba(0,0,0,0.6);
+    padding: 6px;
     border-radius: 8px;
-    background: rgba(0,0,0,0.3);
+    z-index: 10;
+    pointer-events: auto;
+  }
+  .nav-btn{
+    width: 35px; height: 35px;
+    background: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    font-size: 12px;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px black;
-    margin: 10px auto;
-    box-shadow: 0 4px 8px rgba(0,0,0,.3);
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
   }
-  
+  .nav-btn:hover{ background: #e0e0e0; }
+  .nav-btn:active{ background: #ccc; }
+
   .handSection{margin:10px 0;}
   .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:5px; text-align:center; text-shadow:1px 1px 2px black;}
   #handPlayer1{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
   #handPlayer2{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
-  
+
   .handCard{width:60px; height:60px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
     border:2px solid var(--primary); border-radius:6px; overflow:hidden; cursor:pointer; background:#fff;
     box-shadow:0 4px 8px rgba(0,0,0,.25); transition:transform .2s ease, box-shadow .2s ease;}
@@ -132,33 +149,34 @@
   .handCard.selected{outline:3px solid var(--accent); transform:translateY(-8px) scale(1.08);}
   .handCard.rotate-pulse{ animation: rotatePulse .25s ease; }
   @keyframes rotatePulse{ 0%{transform:scale(1) rotate(0deg);} 50%{transform:scale(1.1) rotate(15deg);} 100%{transform:scale(1) rotate(0deg);} }
-  
+
   .ctrlBar{display:flex; gap:8px; justify-content:center; margin-top:8px;}
   .ctrlBtn{padding:8px 14px; border:none; border-radius:20px; font-weight:700; font-size:13px; cursor:pointer; transition:filter .2s;}
   .ctrlBtn.primary{background:var(--accent); color:#fff;}
   .ctrlBtn.gray{background:#e0e0e0; color:#333;}
   .ctrlBtn:disabled{opacity:.4; cursor:not-allowed;}
   .ctrlBtn.primary:disabled{opacity:.4;}
-  
+
   #log{width:100%; max-height:100px; overflow-y:auto; background:var(--panel); border:1px solid var(--border);
     border-radius:10px; padding:10px 12px; font-size:12px; line-height:1.6; margin-top:10px;}
   #log p b.kamu{color:var(--accent);} #log p b.ai{color:var(--danger);}
-  
+
   #restartBar{display:flex; justify-content:center; margin-top:10px;}
-  
+
   #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:50;
     align-items:center; justify-content:center;}
   #overlay .box{background:#fff; border-radius:14px; padding:30px 40px; text-align:center; max-width:90%;}
   #overlay h2{font-size:22px; margin-bottom:10px;}
   #overlay p{font-size:14px; margin-bottom:6px;}
-  
+
   body.interaction-locked #board,
   body.interaction-locked #handPlayer1,
   body.interaction-locked #handPlayer2,
-  body.interaction-locked .draw-pile{
+  body.interaction-locked .draw-pile,
+  body.interaction-locked #boardControls{
     pointer-events:none;
   }
-  
+
   /* ===== PERBAIKAN UNTUK PERANGKAT SENTUH ===== */
   .handCard, .card, .cellEmpty, #board, #boardWrap, #handPlayer1, #handPlayer2, .draw-pile {
     touch-action: none !important;
@@ -169,7 +187,7 @@
   body.interaction-dragging #boardWrap {
     overflow: hidden;
   }
-  
+
   @media (max-width:560px){
     .card,.cellEmpty{width:56px;height:56px;} .handCard{width:50px;height:50px;}
   }
@@ -189,7 +207,7 @@
   </div>
   <button class="bigBtn" id="btnStart">Mulai Permainan</button>
   <div class="rulesBox">
-    <b>Cara main:</b> Klik kartu untuk memilih, lalu tekan R untuk rotasi. Atau drag kartu langsung ke sel papan. Jika tidak valid, kartu kembali. Pemain yang habis kartunya menang.
+    <b>Cara main:</b> Klik kartu untuk memilih, lalu tekan R untuk rotasi. Atau drag kartu langsung ke sel papan. Gunakan tombol panah di pojok kanan bawah papan untuk menggeser tampilan jika di-zoom.
   </div>
 </div>
 
@@ -209,7 +227,19 @@
     </div>
 
     <!-- Papan di tengah -->
-    <div id="boardWrap"><div id="board"></div></div>
+    <div id="boardWrap">
+      <div id="board"></div>
+      <!-- Kontrol Navigasi & Zoom -->
+      <div id="boardControls">
+        <button class="nav-btn" onclick="pan(0, -50)">↑</button>
+        <button class="nav-btn" onclick="pan(-50, 0)">←</button>
+        <button class="nav-btn" onclick="resetView()">⌂</button>
+        <button class="nav-btn" onclick="pan(50, 0)">→</button>
+        <button class="nav-btn" onclick="pan(0, 50)">↓</button>
+        <button class="nav-btn" onclick="zoomOut()">−</button>
+        <button class="nav-btn" onclick="zoomIn()">+</button>
+      </div>
+    </div>
     
     <!-- Tumpukan Tarik -->
     <div id="drawPile" class="draw-pile">0</div>
@@ -297,6 +327,10 @@ const key = (x,y) => x+","+y;
 const DIRS = { N:[0,-1], E:[1,0], S:[0,1], W:[-1,0] };
 const OPP  = { N:"S", E:"W", S:"N", W:"E" };
 
+/* View State untuk Zoom dan Pan */
+let viewState = { scale: 1, x: 0, y: 0 };
+let baseFitScale = 1;
+
 function newGame(mode){
   const deck = shuffle(buildDeck());
   const hands = [];
@@ -315,6 +349,8 @@ function newGame(mode){
     newCard: null,
     animating: false
   };
+  // Reset view saat game baru
+  viewState = { scale: 1, x: 0, y: 0 };
   log("Permainan dimulai! Player 1 jalan pertama.");
   renderAll();
 }
@@ -363,8 +399,6 @@ const handP2El = document.getElementById("handPlayer2");
 const drawPileEl = document.getElementById("drawPile");
 
 function quadDivsHTML(q){
-  // Urutan visual grid 2x2 (row-major): TL, TR, BL, BR.
-  // q logis = [TL, TR, BR, BL], jadi BL dan BR ditukar posisinya di sini.
   return '<div class="q" style="background:'+COLORS[q[0]].h+'"></div>'+
          '<div class="q" style="background:'+COLORS[q[1]].h+'"></div>'+
          '<div class="q" style="background:'+COLORS[q[3]].h+'"></div>'+
@@ -389,8 +423,10 @@ function renderBoard(){
   let xs = cells.map(c=>c[0]), ys = cells.map(c=>c[1]);
   for(const k of legalSet){ const [x,y]=k.split(",").map(Number); xs.push(x); ys.push(y); }
   const minX=Math.min(...xs)-1, maxX=Math.max(...xs)+1, minY=Math.min(...ys)-1, maxY=Math.max(...ys)+1;
-  boardEl.style.width  = ((maxX-minX+1)*70)+"px";
-  boardEl.style.height = ((maxY-minY+1)*70)+"px";
+  const boardWidth = (maxX-minX+1)*70;
+  const boardHeight = (maxY-minY+1)*70;
+  boardEl.style.width  = boardWidth + "px";
+  boardEl.style.height = boardHeight + "px";
   let h = "";
   for(let y=minY;y<=maxY;y++) for(let x=minX;x<=maxX;x++){
     const k = key(x,y), px=(x-minX)*70, py=(y-minY)*70;
@@ -408,6 +444,62 @@ function renderBoard(){
   boardEl.querySelectorAll(".cellEmpty.legal").forEach(el=>{
     el.onclick = ()=> onCellClick(+el.dataset.x, +el.dataset.y);
   });
+  fitBoard();
+  applyTransform();
+}
+
+/* Fungsi untuk menyesuaikan skala papan agar muat di layar */
+function fitBoard(){
+  const wrap = document.getElementById("boardWrap");
+  const wrapWidth = wrap.clientWidth - 30;
+  const wrapHeight = wrap.clientHeight - 30;
+  const boardWidth = boardEl.offsetWidth;
+  const boardHeight = boardEl.offsetHeight;
+  
+  if(boardWidth === 0 || boardHeight === 0) return;
+  
+  let scale = 1;
+  if(boardWidth > wrapWidth || boardHeight > wrapHeight){
+    scale = Math.min(wrapWidth / boardWidth, wrapHeight / boardHeight);
+    if(scale > 1) scale = 1;
+  }
+  baseFitScale = scale;
+  
+  // Jika user belum memanipulasi view, ikuti auto fit
+  if(viewState.scale === 1 || viewState.scale === baseFitScale) {
+      viewState.scale = baseFitScale;
+  }
+}
+
+/* Terapkan Transformasi pada papan */
+function applyTransform(){
+  boardEl.style.transform = `translate(${viewState.x}px, ${viewState.y}px) scale(${viewState.scale})`;
+}
+
+/* ================= KONTROL ZOOM & PAN ================= */
+function zoomIn() {
+  viewState.scale += 0.1;
+  if (viewState.scale > 3) viewState.scale = 3;
+  applyTransform();
+}
+
+function zoomOut() {
+  viewState.scale -= 0.1;
+  if (viewState.scale < 0.5) viewState.scale = 0.5;
+  applyTransform();
+}
+
+function pan(dx, dy) {
+  viewState.x += dx;
+  viewState.y += dy;
+  applyTransform();
+}
+
+function resetView() {
+  viewState.scale = baseFitScale;
+  viewState.x = 0;
+  viewState.y = 0;
+  applyTransform();
 }
 
 function renderHands(){
@@ -444,7 +536,6 @@ function updateHandSelectionUI(){
 function renderStatus(){
   document.getElementById("opponentInfo").textContent = (S.mode==='pvp' ? "Player 2" : "Komputer") + " (" + S.hands[1].length + " kartu)";
   
-  // Update jumlah tumpukan tarik
   drawPileEl.textContent = S.draw.length;
 
   const btn1 = document.getElementById("btnDraw1");
@@ -493,12 +584,10 @@ function animateMoveCard(fromElement, toElement, cardQ, callback){
   document.body.appendChild(fly);
 
   requestAnimationFrame(() => {
-    // Pindahkan posisi, tambah efek scale membesar lalu mengecil, dan sedikit rotasi
     fly.style.left = toRect.left + 'px';
     fly.style.top = toRect.top + 'px';
     fly.style.transform = 'scale(1.15) rotate(5deg)';
     
-    // Setelah setengah waktu, kembali ke skala normal
     setTimeout(() => {
       fly.style.transform = 'scale(1) rotate(0deg)';
     }, 250);
@@ -510,16 +599,13 @@ function animateMoveCard(fromElement, toElement, cardQ, callback){
   }, 550);
 }
 
-/* Fungsi untuk animasi pengambilan kartu dari tumpukan tarik ke tangan */
 function animateDrawToHand(playerIndex, callback){
-  // Ambil kartu dari tumpukan
   const card = S.draw.shift();
   if(!card) { callback(); return; }
   
   const fromEl = drawPileEl;
   const toEl = playerIndex === 0 ? handP1El : handP2El;
   
-  // Buat elemen terbang
   const fly = document.createElement('div');
   fly.className = 'flying-card';
   const fromRect = fromEl.getBoundingClientRect();
@@ -528,10 +614,9 @@ function animateDrawToHand(playerIndex, callback){
   fly.style.top = fromRect.top + 'px';
   fly.style.width = fromRect.width + 'px';
   fly.style.height = fromRect.height + 'px';
-  fly.innerHTML = quadDivsHTML(card); // kartu belum dirotasi, tampilkan apa adanya
+  fly.innerHTML = quadDivsHTML(card);
   document.body.appendChild(fly);
   
-  // Animasi
   requestAnimationFrame(() => {
     fly.style.left = toRect.left + 'px';
     fly.style.top = toRect.top + 'px';
@@ -544,7 +629,6 @@ function animateDrawToHand(playerIndex, callback){
   
   setTimeout(() => {
     fly.remove();
-    // Setelah animasi selesai, tambahkan kartu ke tangan
     S.hands[playerIndex].push(card);
     callback();
   }, 550);
@@ -577,7 +661,7 @@ function attachDrag(el, pid, cardIndex){
       const dy = Math.abs(e.clientY - startY);
       if(dx + dy > 5){
         isDragging = true;
-        e.preventDefault(); // <--- TAMBAHKAN BARIS INI
+        e.preventDefault();
 
         if(S.selected !== cardIndex){
           S.selected = cardIndex;
@@ -596,8 +680,6 @@ function attachDrag(el, pid, cardIndex){
         document.body.appendChild(dragCard);
 
         el.style.opacity = '0';
-
-        // Tambahkan class untuk mengunci scroll papan
         document.body.classList.add('interaction-dragging');
       }
     }
@@ -769,7 +851,6 @@ document.getElementById("btnDraw1").onclick = ()=>{
   const canMove = legalMoves(S.hands[0]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
-    // Animasi ambil kartu
     S.animating = true;
     S.locked = true;
     document.body.classList.add('interaction-locked');
@@ -921,6 +1002,11 @@ document.getElementById("btnStart").onclick = ()=>{
   document.getElementById("log").innerHTML = "";
   newGame(currentMode);
 };
+
+window.addEventListener('resize', ()=>{
+  if(S) fitBoard();
+  applyTransform();
+});
 
 (function test(){
   const d = buildDeck();
