@@ -341,15 +341,20 @@ function newGame(mode){
   for(let i=0;i<2;i++) hands.push(deck.splice(0,8).sort((a,b)=>cardValue(b)-cardValue(a)));
   const board = new Map();
   board.set(key(0,0), { q: deck.shift(), byAI: false });
+  
+  // Inisialisasi rotasi untuk setiap kartu di tangan
+  const handRotations = hands.map(hand => hand.map(() => 0)); // semua rotasi awal 0
+  
   S = {
     mode: mode,
     hands,
+    handRotations,
     draw: deck,
     board,
     turn: 0,
     locked: false,
     selected: -1,
-    selRot: 0,
+    selRot: 0, // tetap dipakai untuk sementara, tapi diambil dari handRotations
     newCard: null,
     animating: false
   };
@@ -504,19 +509,25 @@ function resetView() {
   applyTransform();
 }
 
+/* ===== PERBAIKAN: TAMPILKAN ROTASI TERSIMPAN UNTUK SEMUA KARTU ===== */
 function renderHands(){
+  // Player 1
   let h1 = "";
   S.hands[0].forEach((c,i)=>{
-    h1 += cardHTML(rotated(c, (S.turn===0 && S.selected===i) ? S.selRot : 0), "handCard"+(S.turn===0 && S.selected===i?" selected":""), 'data-i="'+i+'"');
+    // Gunakan rotasi tersimpan untuk kartu ini (untuk semua kartu, bukan hanya yang dipilih)
+    const rot = S.handRotations[0][i] || 0;
+    h1 += cardHTML(rotated(c, rot), "handCard"+(S.turn===0 && S.selected===i?" selected":""), 'data-i="'+i+'"');
   });
   handP1El.innerHTML = h1;
   handP1El.querySelectorAll(".handCard").forEach(el=>{
     attachDrag(el, 0, +el.dataset.i);
   });
 
+  // Player 2 / Komputer
   let h2 = "";
   S.hands[1].forEach((c,i)=>{
-    h2 += cardHTML(rotated(c, (S.turn===1 && S.selected===i) ? S.selRot : 0), "handCard"+(S.turn===1 && S.selected===i?" selected":""), 'data-i="'+i+'"');
+    const rot = S.handRotations[1][i] || 0;
+    h2 += cardHTML(rotated(c, rot), "handCard"+(S.turn===1 && S.selected===i?" selected":""), 'data-i="'+i+'"');
   });
   handP2El.innerHTML = h2;
   if(S.mode === 'pvp') {
@@ -632,6 +643,7 @@ function animateDrawToHand(playerIndex, callback){
   setTimeout(() => {
     fly.remove();
     S.hands[playerIndex].push(card);
+    S.handRotations[playerIndex].push(0); // rotasi awal 0
     callback();
   }, 550);
 }
@@ -667,7 +679,8 @@ function attachDrag(el, pid, cardIndex){
 
         if(S.selected !== cardIndex){
           S.selected = cardIndex;
-          S.selRot = 0;
+          // Ambil rotasi tersimpan
+          S.selRot = S.handRotations[pid][cardIndex];
         }
         updateHandSelectionUI();
         renderBoard();
@@ -783,7 +796,11 @@ function onHandClick(pid, i){
   if(S.locked || S.animating) return;
   if(S.turn !== pid) return;
   if(S.selected === i){ S.selected = -1; }
-  else { S.selected = i; S.selRot = 0; }
+  else {
+    S.selected = i;
+    // Ambil rotasi tersimpan
+    S.selRot = S.handRotations[pid][i];
+  }
   renderAll();
 }
 
@@ -825,6 +842,7 @@ function placeCard(pid, cardIndex, x, y, q){
   S.board.set(key(x,y), { q, byAI: (pid===1 && S.mode==='pve') });
   S.newCard = key(x,y);
   S.hands[pid].splice(cardIndex, 1);
+  S.handRotations[pid].splice(cardIndex, 1); // hapus rotasi kartu yang ditempatkan
   S.selected = -1;
   log("memasang kartu di ("+x+","+y+").", pid===0 ? "p1" : "p2");
   endTurn(pid);
@@ -833,6 +851,8 @@ function placeCard(pid, cardIndex, x, y, q){
 function handleRotate(pid){
   if(S.locked || S.animating || S.turn !== pid || S.selected < 0) return;
   S.selRot = (S.selRot + 1) % 4;
+  // Simpan rotasi permanen untuk kartu ini
+  S.handRotations[pid][S.selected] = S.selRot;
   renderAll();
   const handEl = pid === 0 ? handP1El : handP2El;
   const selectedEl = handEl.querySelector(".handCard.selected");
