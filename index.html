@@ -78,6 +78,25 @@
     box-shadow: 0 6px 12px rgba(0,0,0,0.3);
   }
   
+  /* Kartu drag saat dipegang */
+  .dragging-card{
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    width: 60px;
+    height: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    border: 2px solid var(--accent);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 8px 16px rgba(0,0,0,.4);
+    transform: rotate(5deg) scale(1.1);
+    opacity: 0.9;
+  }
+  
   .handSection{margin:10px 0;}
   .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:5px; text-align:center; text-shadow:1px 1px 2px black;}
   #handPlayer1{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
@@ -117,7 +136,7 @@
 <body>
 
 <h1>QUADRAN ZTRATAX</h1>
-<div class="subtitle">Meja Permainan 2 Pemain · Top-Down</div>
+<div class="subtitle">Meja Permainan 2 Pemain · Top-Down · Drag & Drop</div>
 
 <!-- LAYAR AWAL -->
 <div id="startScreen">
@@ -128,7 +147,7 @@
   </div>
   <button class="bigBtn" id="btnStart">▶ Mulai Permainan</button>
   <div class="rulesBox">
-    <b>Cara main:</b> Klik kartu di tanganmu, lalu klik sel biru yang menyala di papan. Tekan <b>R</b> untuk rotasi kartu. Jika tidak ada sel biru, klik tombol <b>Ambil Kartu</b>. Pemain yang habis kartunya menang.
+    <b>Cara main:</b> Klik kartu di tanganmu, lalu klik sel biru di papan. Atau <b>drag kartu</b> ke sel yang dituju. Jika tidak valid, kartu akan kembali. Tekan <b>R</b> untuk rotasi. Pemain yang habis kartunya menang.
   </div>
 </div>
 
@@ -351,6 +370,7 @@ function renderHands(){
   handP1El.innerHTML = h1;
   handP1El.querySelectorAll(".handCard").forEach(el=>{
     el.onclick = ()=> onHandClick(0, +el.dataset.i);
+    attachDrag(el, 0, +el.dataset.i);
   });
   
   let h2 = "";
@@ -361,6 +381,7 @@ function renderHands(){
   if(S.mode === 'pvp') {
     handP2El.querySelectorAll(".handCard").forEach(el=>{
       el.onclick = ()=> onHandClick(1, +el.dataset.i);
+      attachDrag(el, 1, +el.dataset.i);
     });
   }
 }
@@ -428,6 +449,143 @@ function animateMoveCard(fromElement, toElement, cardQ, callback){
   }, 400);
 }
 
+/* Fungsi untuk drag & drop */
+function attachDrag(el, pid, cardIndex){
+  let isDragging = false;
+  let startX, startY, dragCard, lastTarget;
+  
+  el.addEventListener('pointerdown', (e) => {
+    if(S.locked || S.animating || S.turn !== pid) return;
+    // Jika tidak sedang dipilih, pilih dulu
+    if(S.selected !== cardIndex){
+      S.selected = cardIndex;
+      S.selRot = 0;
+      renderAll(); // re-render untuk highlight
+    }
+    
+    isDragging = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    
+    // Simpan target asal
+    lastTarget = el;
+  });
+  
+  el.addEventListener('pointermove', (e) => {
+    if(!isDragging && Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > 5){
+      isDragging = true;
+      // Buat elemen drag
+      dragCard = document.createElement('div');
+      dragCard.className = 'dragging-card';
+      const q = S.hands[pid][cardIndex];
+      const displayQ = rotated(q, S.selRot);
+      dragCard.innerHTML = displayQ.map(c=>'<div class="q" style="background:'+COLORS[c].h+'"></div>').join("");
+      dragCard.style.left = (e.clientX - 30) + 'px';
+      dragCard.style.top = (e.clientY - 30) + 'px';
+      document.body.appendChild(dragCard);
+      
+      // Sembunyikan kartu asli
+      el.style.opacity = '0';
+    }
+    
+    if(isDragging && dragCard){
+      dragCard.style.left = (e.clientX - 30) + 'px';
+      dragCard.style.top = (e.clientY - 30) + 'px';
+    }
+  });
+  
+  el.addEventListener('pointerup', (e) => {
+    if(!isDragging){
+      // Klik biasa
+      el.style.opacity = '1';
+      onHandClick(pid, cardIndex);
+      return;
+    }
+    
+    // Drag selesai
+    el.style.opacity = '1';
+    isDragging = false;
+    
+    // Cari elemen sel target di bawah kursor
+    const boardCells = document.querySelectorAll('.cellEmpty');
+    let targetCell = null;
+    for(const cell of boardCells){
+      const rect = cell.getBoundingClientRect();
+      if(e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom){
+        targetCell = cell;
+        break;
+      }
+    }
+    
+    if(targetCell){
+      const x = +targetCell.dataset.x;
+      const y = +targetCell.dataset.y;
+      const q = rotated(S.hands[pid][cardIndex], S.selRot);
+      if(canPlace(x, y, q) > 0){
+        // Legal: animasi terbang ke target
+        S.animating = true;
+        S.locked = true;
+        renderAll(); // nonaktifkan interaksi
+        
+        // Hapus dragCard
+        if(dragCard) dragCard.remove();
+        dragCard = null;
+        
+        animateMoveCard(el, targetCell, q, ()=>{
+          S.animating = false;
+          placeCard(pid, cardIndex, x, y, q);
+        });
+      } else {
+        // Tidak legal: kartu kembali ke tangan
+        if(dragCard) dragCard.remove();
+        dragCard = null;
+        
+        // Buat animasi mundur ke posisi asal
+        const fly = document.createElement('div');
+        fly.className = 'flying-card';
+        const fromRect = targetCell.getBoundingClientRect();
+        const toRect = el.getBoundingClientRect();
+        fly.style.left = fromRect.left + 'px';
+        fly.style.top = fromRect.top + 'px';
+        fly.style.width = '70px';
+        fly.style.height = '70px';
+        fly.innerHTML = q.map(c=>'<div class="q" style="background:'+COLORS[c].h+'"></div>').join("");
+        document.body.appendChild(fly);
+        
+        requestAnimationFrame(()=>{
+          fly.style.left = toRect.left + 'px';
+          fly.style.top = toRect.top + 'px';
+        });
+        
+        setTimeout(()=>{
+          fly.remove();
+          S.selected = -1;
+          renderAll();
+        }, 400);
+        
+        log("Kartu tidak valid, kembali ke tangan.", pid===0?"p1":"p2");
+      }
+    } else {
+      // Drop di luar papan -> kembali ke tangan
+      if(dragCard) dragCard.remove();
+      dragCard = null;
+      S.selected = -1;
+      renderAll();
+    }
+  });
+  
+  el.addEventListener('pointercancel', ()=>{
+    if(isDragging){
+      if(dragCard) dragCard.remove();
+      dragCard = null;
+      el.style.opacity = '1';
+      isDragging = false;
+      S.selected = -1;
+      renderAll();
+    }
+  });
+}
+
 /* ================= INTERAKSI ================= */
 function onHandClick(pid, i){
   if(S.locked || S.animating) return;
@@ -443,10 +601,8 @@ function onCellClick(x, y){
   const card = S.hands[pid][S.selected];
   const q = rotated(card, S.selRot);
   if(canPlace(x, y, q) > 0){
-    // Ambil elemen kartu dari tangan
     const handEl = pid === 0 ? handP1El : handP2El;
     const fromCard = handEl.querySelector('.handCard.selected');
-    // Cari elemen sel target di papan
     const boardCells = document.querySelectorAll('.cellEmpty');
     let toCell = null;
     for(const cell of boardCells){
@@ -457,15 +613,13 @@ function onCellClick(x, y){
     }
     
     if(!fromCard || !toCell){
-      // Fallback jika elemen tidak ditemukan (misal saat AI)
       placeCard(pid, S.selected, x, y, q);
       return;
     }
     
-    // Animasi
     S.animating = true;
     S.locked = true;
-    renderAll(); // nonaktifkan interaksi
+    renderAll();
     
     animateMoveCard(fromCard, toCell, q, ()=>{
       S.animating = false;
@@ -582,12 +736,9 @@ function aiTurn(){
     const best = moves.filter(m=> m.contacts === moves[0].contacts);
     const m = best[Math.floor(Math.random()*best.length)];
     
-    // Tentukan kartu dan target
     const card = hand[m.ci];
     const q = rotated(card, m.rot);
-    const handEl = handP2El;
-    const fromCard = handEl.children[m.ci]; // elemen kartu di tangan AI
-    // Cari sel target
+    const fromCard = handP2El.children[m.ci];
     const boardCells = document.querySelectorAll('.cellEmpty');
     let toCell = null;
     for(const cell of boardCells){
@@ -600,13 +751,12 @@ function aiTurn(){
     if(fromCard && toCell){
       S.animating = true;
       S.locked = true;
-      renderAll(); // nonaktifkan interaksi
+      renderAll();
       animateMoveCard(fromCard, toCell, q, ()=>{
         S.animating = false;
         placeCard(1, m.ci, m.x, m.y, q);
       });
     } else {
-      // Fallback tanpa animasi
       placeCard(1, m.ci, m.x, m.y, q);
     }
   } else if(S.draw.length > 0){
