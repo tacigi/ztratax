@@ -132,6 +132,7 @@ let currentDraws = { p1:0, p2:0 };
 let currentPlayedValue = { p1:0, p2:0 };
 let gameStartTime = 0;
 let gameDuration = 0;
+let timerInterval = null; // <-- TAMBAHAN UNTUK TIMER
 
 /* ================= LOG ================= */
 function addLog(msg, who){
@@ -159,10 +160,12 @@ function restartGame(){
   closePauseMenu();
   const mode = S.mode;
   gameLogs = [];
+  clearInterval(timerInterval); // <-- Tambahan
   newGame(mode);
 }
 function changeMode(){
   closePauseMenu();
+  clearInterval(timerInterval); // <-- Tambahan
   gameLogs = [];
   document.getElementById('gameScreen').style.display = 'none';
   document.getElementById('startScreen').style.display = 'flex';
@@ -227,6 +230,11 @@ function newGame(mode){
   currentDraws = { p1:0, p2:0 };
   currentPlayedValue = { p1:0, p2:0 };
   gameStartTime = Date.now();
+  
+  // Mulai timer
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  
   addLog("Permainan dimulai! Player 1 jalan pertama.");
   renderAll();
 }
@@ -401,6 +409,14 @@ function resetView() {
   applyTransform();
 }
 
+function updateTimer(){
+  if(!S) return;
+  const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
+  document.getElementById('gameTimer').textContent = `⏱️ ${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+}
+
 function renderHands(){
   if(gamePaused) return;
   let h1 = "";
@@ -432,6 +448,19 @@ function updateHandSelectionUI(){
 }
 
 function renderStatus(){
+  updateTimer();
+  
+  // Label dan skor sesuai mode
+  if (S.mode === 'pvp') {
+    document.getElementById('scoreP1').textContent = 'P1: ' + currentScores.p1;
+    document.getElementById('scoreP2').textContent = 'P2: ' + currentScores.p2;
+    document.getElementById('scoreP2').classList.remove('hidden');
+  } else {
+    // PvE: hanya tampilkan skor pemain
+    document.getElementById('scoreP1').textContent = 'Player: ' + currentScores.p1;
+    document.getElementById('scoreP2').classList.add('hidden');
+  }
+
   document.getElementById("opponentInfo").textContent = (S.mode==='pvp' ? "Player 2" : "Komputer") + " (" + S.hands[1].length + " kartu)";
   drawPileCountEl.textContent = S.draw.length + " kartu yang tersisa";
 
@@ -720,6 +749,8 @@ function endTurn(pi){
   renderAll();
   if(S.hands[pi].length === 0){
     gameDuration = Date.now() - gameStartTime;
+    clearInterval(timerInterval); // <-- Hentikan timer
+
     const winnerIndex = pi;
     const loserIndex = 1 - pi;
     const remainingValueLoser = S.hands[loserIndex].reduce((s,c)=>s+cardValue(c),0);
@@ -751,6 +782,8 @@ function endTurn(pi){
     for(let i=0;i<2;i++) if(legalMoves(S.hands[i]).length > 0){ anyMove = true; break; }
     if(!anyMove){
       gameDuration = Date.now() - gameStartTime;
+      clearInterval(timerInterval); // <-- Hentikan timer
+
       const totals = S.hands.map(h => h.reduce((s,c)=> s + cardValue(c), 0));
       const min = Math.min(...totals);
       const winners = totals.map((t,i)=>[t,i]).filter(x=>x[0]===min).map(x=>x[1]);
@@ -901,6 +934,7 @@ document.getElementById("btnDraw2").onclick = ()=>{
 
 document.getElementById("btnAgain").onclick = ()=>{
   SoundEffects.click();
+  clearInterval(timerInterval); // <-- Hentikan timer saat kembali ke menu
   document.getElementById("overlay").style.display = "none";
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("startScreen").style.display = "flex";
