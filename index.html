@@ -95,66 +95,45 @@
     transition: transform 0.2s ease;
   }
 
-  /* ===== Tumpukan Tarik Baru ===== */
+  /* ===== Tumpukan Tarik ===== */
+  #drawPileContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-left: 20px;
+  }
   .draw-pile{
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 15px auto;
-    width: auto;
     background: none;
     border: none;
   }
   .draw-pile img{
     width: 70px;
-    height: 95px;
+    height: 70px;
     border-radius: 6px;
     box-shadow: 0 6px 12px rgba(0,0,0,.4);
   }
   .draw-pile span{
     color: #fff;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     text-shadow: 1px 1px 3px rgba(0,0,0,.8);
     margin-top: 6px;
     text-align: center;
+    white-space: nowrap;
   }
 
-  /* ---------- KONTROL NAVIGASI & ZOOM (FORMAT BARU) ---------- */
-  #boardControls{
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    display: grid;
-    grid-template-areas: 
-      "minus up plus"
-      "left home right"
-      "clue down mute";
-    grid-template-columns: repeat(3, 35px);
-    grid-template-rows: repeat(3, 35px);
-    gap: 4px;
-    background: rgba(0,0,0,0.6);
-    padding: 6px;
-    border-radius: 8px;
-    z-index: 10;
-  }
-  .nav-btn{
-    width: 35px; height: 35px;
-    background: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
+  #player1Area{
     display: flex;
-    align-items: center;
+    flex-direction: row;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    align-items: center;
+    margin-top: 10px;
   }
-  .nav-btn:hover{ background: #e0e0e0; }
-  .nav-btn:active{ background: #ccc; }
 
   .handSection{margin:10px 0;}
   .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:5px; text-align:center; text-shadow:1px 1px 2px black;}
@@ -196,7 +175,6 @@
     pointer-events:none;
   }
 
-  /* ===== PERBAIKAN UNTUK PERANGKAT SENTUH ===== */
   .handCard, .card, .cellEmpty, #board, #boardWrap, #handPlayer1, #handPlayer2, .draw-pile {
     touch-action: none !important;
     -webkit-user-select: none !important;
@@ -210,6 +188,44 @@
   @media (max-width:560px){
     .card,.cellEmpty{width:56px;height:56px;} .handCard{width:50px;height:50px;}
   }
+
+  /* ===== KONTROL NAVIGASI 3x3 (PERBAIKAN) ===== */
+  #boardControls{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 35px);
+    grid-template-rows: repeat(3, 35px);
+    grid-template-areas:
+      "minus up plus"
+      "left home right"
+      "clue down mute";
+    gap: 4px;
+    background: rgba(0,0,0,0.6);
+    padding: 6px;
+    border-radius: 8px;
+    z-index: 10;
+  }
+  .nav-btn{
+    width: 35px;
+    height: 35px;
+    background: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    padding: 0;
+    margin: 0;
+  }
+  .nav-btn:hover{ background: #e0e0e0; }
+  .nav-btn:active{ background: #ccc; }
 </style>
 </head>
 <body>
@@ -248,7 +264,7 @@
     <!-- Papan di tengah -->
     <div id="boardWrap">
       <div id="board"></div>
-      <!-- Kontrol Navigasi & Zoom (Format Baru) -->
+      <!-- Kontrol Navigasi & Zoom (Format 3x3) -->
       <div id="boardControls">
         <button class="nav-btn" style="grid-area: minus" onclick="zoomOut()">-</button>
         <button class="nav-btn" style="grid-area: up" onclick="pan(0, 50)">↑</button>
@@ -261,20 +277,22 @@
         <button class="nav-btn" style="grid-area: mute" onclick="toggleMute()" title="Mute/Unmute">🔊</button>
       </div>
     </div>
-    
-    <!-- Tumpukan Tarik (di bawah tombol navigasi) -->
-    <div id="drawPile" class="draw-pile">
-      <img src="ztrataxback.png" alt="Tumpukan Kartu">
-      <span id="drawPileCount">0</span>
-    </div>
 
-    <!-- Area Player 1 (bawah) -->
+    <!-- Area Player 1 (bawah) - termasuk tumpukan -->
     <div id="player1Area">
       <div class="handSection">
         <div id="handPlayer1"></div>
         <div class="ctrlBar" id="ctrlPlayer1">
           <button class="ctrlBtn gray" id="btnRotate1">Rotasi</button>
           <button class="ctrlBtn primary" id="btnDraw1" disabled>Ambil Kartu</button>
+        </div>
+      </div>
+      
+      <!-- Tumpukan Tarik di sebelah kanan Player 1 -->
+      <div id="drawPileContainer">
+        <div id="drawPile" class="draw-pile">
+          <img src="ztrataxback.png" alt="Tumpukan Kartu">
+          <span id="drawPileCount">0 kartu yang tersisa</span>
         </div>
       </div>
     </div>
@@ -314,7 +332,7 @@ const VAL = [1,2,3,4,5,6,7];
 /* ================= AUDIO SYSTEM ================= */
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
-let isMuted = false; // Variabel mute global
+let isMuted = false;
 
 function initAudio(){
   if(!audioCtx){
@@ -730,7 +748,7 @@ function updateHandSelectionUI(){
 function renderStatus(){
   document.getElementById("opponentInfo").textContent = (S.mode==='pvp' ? "Player 2" : "Komputer") + " (" + S.hands[1].length + " kartu)";
   
-  drawPileCountEl.textContent = S.draw.length;
+  drawPileCountEl.textContent = S.draw.length + " kartu yang tersisa";
 
   const btn1 = document.getElementById("btnDraw1");
   const btn2 = document.getElementById("btnDraw2");
@@ -796,7 +814,7 @@ function animateDrawToHand(playerIndex, callback){
   const card = S.draw.shift();
   if(!card) { callback(); return; }
   
-  const fromEl = document.getElementById("drawPile");
+  const fromEl = document.getElementById("drawPile").querySelector('img');
   const toEl = playerIndex === 0 ? handP1El : handP2El;
   
   const fly = document.createElement('div');
@@ -806,7 +824,7 @@ function animateDrawToHand(playerIndex, callback){
   fly.style.left = fromRect.left + 'px';
   fly.style.top = fromRect.top + 'px';
   fly.style.width = '70px';
-  fly.style.height = '95px';
+  fly.style.height = '70px';
   fly.innerHTML = quadDivsHTML(card);
   document.body.appendChild(fly);
   
@@ -941,7 +959,7 @@ function attachDrag(el, pid, cardIndex){
         fly.style.left = fromRect.left + 'px';
         fly.style.top = fromRect.top + 'px';
         fly.style.width = '70px';
-        fly.style.height = '95px';
+        fly.style.height = '70px';
         fly.innerHTML = quadDivsHTML(q);
         document.body.appendChild(fly);
 
