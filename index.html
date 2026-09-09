@@ -26,10 +26,9 @@
   h1{font-size:24px; letter-spacing:3px; color:#fff; text-align:center; margin-top:2px; text-shadow:2px 2px 4px rgba(0,0,0,.5); flex-shrink:0;}
   .subtitle{font-size:12px; color:#ccc; font-weight:600; text-align:center; margin-bottom:8px; flex-shrink:0;}
 
-  /* ---------- LAYAR AWAL ---------- */
   #startScreen{display:flex; flex-direction:column; align-items:center; gap:18px; margin-top:5vh;
     background:var(--panel); padding:30px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3); max-width:450px; width:100%;
-    overflow-y:auto; /* Hanya layar awal yang boleh scroll jika sangat pendek */
+    overflow-y:auto;
   }
   #startScreen h2{font-size:18px; margin-bottom:10px;}
   .modeOption{ display:flex; justify-content:center; gap:12px; margin-bottom:20px; }
@@ -44,32 +43,20 @@
   .rulesBox{font-size:12px; line-height:1.6; background:#fafafa; border:1px dashed var(--border); border-radius:8px; padding:14px; text-align:left;}
   .rulesBox b{color:var(--primary);}
 
-  /* ---------- PAPAN PERMAINAN ---------- */
   #gameScreen{display:none; width:100%; max-width:1100px; flex-direction:column; align-items:center; flex:1; min-height:0;}
 
   #table{
     width:100%; background:var(--table); border:6px solid var(--table-border); border-radius:20px;
     padding:10px; box-shadow:inset 0 0 30px rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.4);
-    display:flex;
-    flex-direction:column;
-    flex:1;
-    min-height:0; /* Izinkan menyusut */
+    display:flex; flex-direction:column; flex:1; min-height:0;
   }
   #opponentArea{display:flex; flex-direction:column; align-items:center; margin-bottom:5px; flex-shrink:0;}
   #opponentInfo{color:#fff; font-size:14px; margin-bottom:5px; text-shadow:1px 1px 2px black; font-weight:bold;}
 
   #boardWrap{
-    width:100%;
-    overflow:hidden;
-    background:rgba(0,0,0,0.2);
-    border-radius:10px;
-    padding:10px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex:1; /* Ambil sisa ruang */
-    min-height:0;
-    position: relative;
+    width:100%; overflow:hidden; background:rgba(0,0,0,0.2); border-radius:10px; padding:10px;
+    display:flex; justify-content:center; align-items:center;
+    flex:1; min-height:0; position: relative;
   }
   #board{position:relative; transform-origin: center center;}
 
@@ -106,50 +93,23 @@
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
     border: 2px solid var(--accent); border-radius: 6px; overflow: hidden;
     background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,.45);
-    transform: rotate(5deg) scale(1.1); opacity: 0.95;
-    transition: transform 0.2s ease;
+    transform: rotate(5deg) scale(1.1); opacity: 0.95; transition: transform 0.2s ease;
   }
 
-  /* ===== Tumpukan Tarik ===== */
   #drawPileContainer{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-left: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; margin-left: 10px;
   }
   .draw-pile{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none;
   }
   .draw-pile img{
-    width: var(--card-size);
-    height: var(--card-size);
-    border-radius: 6px;
-    box-shadow: 0 6px 12px rgba(0,0,0,.4);
+    width: var(--card-size); height: var(--card-size); border-radius: 6px; box-shadow: 0 6px 12px rgba(0,0,0,.4);
   }
   .draw-pile span{
-    color: #fff;
-    font-size: 12px;
-    font-weight: bold;
-    text-shadow: 1px 1px 3px rgba(0,0,0,.8);
-    margin-top: 4px;
-    text-align: center;
-    white-space: nowrap;
+    color: #fff; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,.8); margin-top: 4px; text-align: center; white-space: nowrap;
   }
 
-  #player1Area{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin-top: 5px;
-    flex-shrink:0;
-  }
+  #player1Area{display:flex; flex-direction:row; justify-content:center; align-items:center; margin-top:5px; flex-shrink:0;}
 
   .handSection{margin:5px 0;}
   .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:3px; text-align:center; text-shadow:1px 1px 2px black;}
@@ -171,136 +131,65 @@
   .ctrlBtn:disabled{opacity:.4; cursor:not-allowed;}
   .ctrlBtn.primary:disabled{opacity:.4;}
 
-  /* Log dan restart selalu terlihat di bawah */
   #log{
-    width:100%; 
-    background:var(--panel); border:1px solid var(--border);
-    border-radius:10px; padding:8px 12px; font-size:12px; line-height:1.6; margin-top:5px;
-    flex-shrink:0; /* Jangan menyusut */
-    max-height:70px; /* Batasi tinggi */
-    overflow-y:auto;
+    width:100%; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:8px 12px;
+    font-size:12px; line-height:1.6; margin-top:5px; flex-shrink:0; max-height:70px; overflow-y:auto;
   }
   #log p b.kamu{color:var(--accent);} #log p b.ai{color:var(--danger);}
 
-  #restartBar{display:flex; justify-content:center; margin-top:5px; flex-shrink:0;} /* Jangan menyusut */
+  #restartBar{display:flex; justify-content:center; margin-top:5px; flex-shrink:0;}
 
-  #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:50;
-    align-items:center; justify-content:center;}
+  #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:50; align-items:center; justify-content:center;}
   #overlay .box{background:#fff; border-radius:14px; padding:30px 40px; text-align:center; max-width:90%;}
   #overlay h2{font-size:22px; margin-bottom:10px;}
   #overlay p{font-size:14px; margin-bottom:6px;}
 
-  body.interaction-locked #board,
-  body.interaction-locked #handPlayer1,
-  body.interaction-locked #handPlayer2,
-  body.interaction-locked .draw-pile,
-  body.interaction-locked #boardControls{
-    pointer-events:none;
-  }
+  body.interaction-locked #board, body.interaction-locked #handPlayer1, body.interaction-locked #handPlayer2, body.interaction-locked .draw-pile, body.interaction-locked #boardControls{ pointer-events:none; }
 
   .handCard, .card, .cellEmpty, #board, #boardWrap, #handPlayer1, #handPlayer2, .draw-pile {
-    touch-action: none !important;
-    -webkit-user-select: none !important;
-    user-select: none !important;
-    -webkit-touch-callout: none !important;
+    touch-action: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-touch-callout: none !important;
   }
-  body.interaction-dragging #boardWrap {
-    overflow: hidden;
-  }
+  body.interaction-dragging #boardWrap { overflow: hidden; }
 
-  /* ===== KONTROL NAVIGASI 3x3 ===== */
   #boardControls{
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    display: grid;
-    grid-template-columns: repeat(3, var(--nav-btn-size));
-    grid-template-rows: repeat(3, var(--nav-btn-size));
-    grid-template-areas:
-      "minus up plus"
-      "left home right"
-      "clue down mute";
-    gap: 4px;
-    background: rgba(0,0,0,0.6);
-    padding: 6px;
-    border-radius: 8px;
-    z-index: 10;
+    position: absolute; bottom: 10px; right: 10px; display: grid;
+    grid-template-columns: repeat(3, var(--nav-btn-size)); grid-template-rows: repeat(3, var(--nav-btn-size));
+    grid-template-areas: "minus up plus" "left home right" "clue down mute";
+    gap: 4px; background: rgba(0,0,0,0.6); padding: 6px; border-radius: 8px; z-index: 10;
   }
   .nav-btn{
-    width: var(--nav-btn-size);
-    height: var(--nav-btn-size);
-    background: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,.2);
-    padding: 0;
-    margin: 0;
+    width: var(--nav-btn-size); height: var(--nav-btn-size); background: #fff; border: none; border-radius: 4px;
+    cursor: pointer; font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2); padding: 0; margin: 0;
   }
-  .nav-btn:hover{ background: #e0e0e0; }
-  .nav-btn:active{ background: #ccc; }
+  .nav-btn:hover{ background: #e0e0e0; } .nav-btn:active{ background: #ccc; }
 
-  /* ===== RESPONSIVE UNTUK LAYAR KECIL ===== */
+  /* CEgah Double-Tap Zoom di Ponsel/Tablet */
+  body, #gameScreen, #table, #boardWrap, #handPlayer1, #handPlayer2, #startScreen, #log, #restartBar, .ctrlBtn, .nav-btn, .bigBtn, .modeBtn {
+    touch-action: manipulation !important; -webkit-user-select: none; user-select: none;
+  }
+
   @media (max-width: 768px) {
-    :root {
-      --card-size: 56px;
-      --hand-card-size: 50px;
-      --nav-btn-size: 30px;
-    }
-    body { padding: 8px; }
-    h1 { font-size: 20px; letter-spacing: 2px; }
-    .subtitle { font-size: 11px; }
-    #table { padding: 8px; border-width: 4px; border-radius: 14px; }
-    #boardWrap { padding: 8px; }
-    .draw-pile img { width: var(--card-size); height: var(--card-size); }
-    .draw-pile span { font-size: 10px; }
-    #drawPileContainer { margin-left: 5px; }
-    #startScreen { padding: 25px; }
-    .modeBtn { padding: 10px 16px; font-size: 14px; }
-    .bigBtn { padding: 12px 28px; font-size: 14px; }
-    .rulesBox { font-size: 11px; }
+    :root { --card-size: 56px; --hand-card-size: 50px; --nav-btn-size: 30px; }
+    body { padding: 8px; } h1 { font-size: 20px; letter-spacing: 2px; } .subtitle { font-size: 11px; }
+    #table { padding: 8px; border-width: 4px; border-radius: 14px; } #boardWrap { padding: 8px; }
+    .draw-pile img { width: var(--card-size); height: var(--card-size); } .draw-pile span { font-size: 10px; }
+    #drawPileContainer { margin-left: 5px; } #startScreen { padding: 25px; } .modeBtn { padding: 10px 16px; font-size: 14px; }
+    .bigBtn { padding: 12px 28px; font-size: 14px; } .rulesBox { font-size: 11px; }
   }
-
   @media (max-width: 480px) {
-    :root {
-      --card-size: 48px;
-      --hand-card-size: 44px;
-      --nav-btn-size: 26px;
-    }
-    body { padding: 6px; }
-    h1 { font-size: 18px; }
-    .subtitle { font-size: 10px; }
-    #table { padding: 6px; border-width: 3px; border-radius: 12px; }
-    #boardWrap { padding: 6px; }
-    .draw-pile img { width: var(--card-size); height: var(--card-size); }
-    .draw-pile span { font-size: 9px; }
-    #drawPileContainer { margin-left: 3px; }
-    #startScreen { padding: 20px; }
-    .modeBtn { padding: 8px 12px; font-size: 13px; }
-    .bigBtn { padding: 10px 22px; font-size: 13px; }
-    .rulesBox { font-size: 10px; padding: 10px; }
-    .ctrlBtn { padding: 6px 10px; font-size: 12px; }
-    #log { font-size: 11px; max-height: 60px; }
+    :root { --card-size: 48px; --hand-card-size: 44px; --nav-btn-size: 26px; }
+    body { padding: 6px; } h1 { font-size: 18px; } .subtitle { font-size: 10px; }
+    #table { padding: 6px; border-width: 3px; border-radius: 12px; } #boardWrap { padding: 6px; }
+    .draw-pile img { width: var(--card-size); height: var(--card-size); } .draw-pile span { font-size: 9px; }
+    #drawPileContainer { margin-left: 3px; } #startScreen { padding: 20px; } .modeBtn { padding: 8px 12px; font-size: 13px; }
+    .bigBtn { padding: 10px 22px; font-size: 13px; } .rulesBox { font-size: 10px; padding: 10px; }
+    .ctrlBtn { padding: 6px 10px; font-size: 12px; } #log { font-size: 11px; max-height: 60px; }
   }
-
-  /* Media query untuk laptop pendek */
   @media (max-height: 800px) {
-    :root {
-      --card-size: 56px;
-      --hand-card-size: 50px;
-      --nav-btn-size: 30px;
-    }
-    h1 { font-size: 20px; margin-top: 2px; }
-    .subtitle { font-size: 11px; margin-bottom: 5px; }
-    #table { padding: 8px; border-width: 4px; }
-    #boardWrap { padding: 8px; }
-    #log { max-height: 50px; font-size: 11px; }
+    :root { --card-size: 56px; --hand-card-size: 50px; --nav-btn-size: 30px; }
+    h1 { font-size: 20px; margin-top: 2px; } .subtitle { font-size: 11px; margin-bottom: 5px; }
+    #table { padding: 8px; border-width: 4px; } #boardWrap { padding: 8px; } #log { max-height: 50px; font-size: 11px; }
     .draw-pile span { font-size: 10px; }
   }
 </style>
@@ -310,7 +199,6 @@
 <h1>QUADRAN ZTRATAX</h1>
 <div class="subtitle">Meja Permainan 2 Pemain &middot; Top-Down &middot; Drag &amp; Drop</div>
 
-<!-- LAYAR AWAL -->
 <div id="startScreen">
   <h2>Pilih Mode Permainan</h2>
   <div class="modeOption">
@@ -323,10 +211,8 @@
   </div>
 </div>
 
-<!-- LAYAR PERMAINAN -->
 <div id="gameScreen">
   <div id="table">
-    <!-- Area Player 2 / Komputer (atas) -->
     <div id="opponentArea">
       <div id="opponentInfo">Player 2 / Komputer</div>
       <div class="handSection">
@@ -338,10 +224,8 @@
       </div>
     </div>
 
-    <!-- Papan di tengah -->
     <div id="boardWrap">
       <div id="board"></div>
-      <!-- Kontrol Navigasi & Zoom (Format 3x3) -->
       <div id="boardControls">
         <button class="nav-btn" style="grid-area: minus" onclick="zoomOut()">-</button>
         <button class="nav-btn" style="grid-area: up" onclick="pan(0, 50)">↑</button>
@@ -355,7 +239,6 @@
       </div>
     </div>
 
-    <!-- Area Player 1 (bawah) - termasuk tumpukan -->
     <div id="player1Area">
       <div class="handSection">
         <div id="handPlayer1"></div>
@@ -364,8 +247,6 @@
           <button class="ctrlBtn primary" id="btnDraw1" disabled>Ambil Kartu</button>
         </div>
       </div>
-      
-      <!-- Tumpukan Tarik di sebelah kanan Player 1 -->
       <div id="drawPileContainer">
         <div id="drawPile" class="draw-pile">
           <img src="ztrataxback.png" alt="Tumpukan Kartu">
@@ -382,7 +263,6 @@
   </div>
 </div>
 
-<!-- OVERLAY HASIL -->
 <div id="overlay">
   <div class="box">
     <h2 id="ovTitle"></h2>
@@ -394,7 +274,6 @@
 
 <script>
 "use strict";
-/* ================= DATA ================= */
 const COLORS = [
   {n:"Putih",  h:"#EDEDED", t:"#000"},
   {n:"Biru",   h:"#1F6FEB", t:"#fff"},
@@ -406,7 +285,6 @@ const COLORS = [
 ];
 const VAL = [1,2,3,4,5,6,7];
 
-/* ================= AUDIO SYSTEM ================= */
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let isMuted = false;
@@ -461,28 +339,21 @@ const SoundEffects = {
   drawCard: () => { playNoise(0.2, 0.2); playTone(500, 0.1, 'sine', 0.3, 0.1); },
   place: () => { playTone(392, 0.15, 'triangle', 0.35); playTone(523, 0.15, 'triangle', 0.3, 0.1); playTone(659, 0.2, 'triangle', 0.25, 0.2); },
   win: () => {
-    playTone(523, 0.15, 'sine', 0.4);
-    playTone(659, 0.15, 'sine', 0.4, 0.15);
-    playTone(784, 0.15, 'sine', 0.4, 0.3);
-    playTone(1046, 0.5, 'sine', 0.45, 0.45);
+    playTone(523, 0.15, 'sine', 0.4); playTone(659, 0.15, 'sine', 0.4, 0.15);
+    playTone(784, 0.15, 'sine', 0.4, 0.3); playTone(1046, 0.5, 'sine', 0.45, 0.45);
   },
   lose: () => {
-    playTone(392, 0.2, 'sine', 0.4);
-    playTone(330, 0.2, 'sine', 0.4, 0.2);
-    playTone(262, 0.3, 'sine', 0.4, 0.4);
-    playTone(196, 0.6, 'sine', 0.3, 0.6);
+    playTone(392, 0.2, 'sine', 0.4); playTone(330, 0.2, 'sine', 0.4, 0.2);
+    playTone(262, 0.3, 'sine', 0.4, 0.4); playTone(196, 0.6, 'sine', 0.3, 0.6);
   },
   draw: () => {
-    playTone(440, 0.2, 'sine', 0.3);
-    playTone(392, 0.2, 'sine', 0.3, 0.15);
-    playTone(349, 0.2, 'sine', 0.3, 0.3);
-    playTone(330, 0.5, 'sine', 0.3, 0.45);
+    playTone(440, 0.2, 'sine', 0.3); playTone(392, 0.2, 'sine', 0.3, 0.15);
+    playTone(349, 0.2, 'sine', 0.3, 0.3); playTone(330, 0.5, 'sine', 0.3, 0.45);
   },
   zoom: () => { playTone(700, 0.08, 'sine', 0.2); },
   pan: () => { playTone(500, 0.06, 'sine', 0.15); }
 };
 
-/* ================= MUSIK CHIPTUNE MENU ================= */
 let menuMusicInterval = null;
 let menuMusicPlaying = false;
 
@@ -507,30 +378,20 @@ function playMenuMusic() {
   menuMusicPlaying = true;
   
   const notes = [
-    { freq: 523.25, dur: 0.12 },  // C5
-    { freq: 659.25, dur: 0.12 },  // E5
-    { freq: 783.99, dur: 0.12 },  // G5
-    { freq: 880.00, dur: 0.24 },  // A5
-    { freq: 783.99, dur: 0.12 },  // G5
-    { freq: 659.25, dur: 0.12 },  // E5
-    { freq: 523.25, dur: 0.12 },  // C5
-    { freq: 587.33, dur: 0.24 },  // D5
+    { freq: 523.25, dur: 0.12 }, { freq: 659.25, dur: 0.12 }, { freq: 783.99, dur: 0.12 }, { freq: 880.00, dur: 0.24 },
+    { freq: 783.99, dur: 0.12 }, { freq: 659.25, dur: 0.12 }, { freq: 523.25, dur: 0.12 }, { freq: 587.33, dur: 0.24 },
   ];
   
   let nextNoteTime = audioCtx.currentTime + 0.1;
   
   function scheduleLoop() {
     const now = audioCtx.currentTime;
-    if (nextNoteTime < now) {
-      nextNoteTime = now + 0.1;
-    }
-    
+    if (nextNoteTime < now) nextNoteTime = now + 0.1;
     for (let i = 0; i < notes.length; i++) {
       const note = notes[i];
       const start = nextNoteTime + (i * 0.25);
       scheduleMenuNote(note.freq, start, note.dur);
     }
-    
     nextNoteTime += notes.length * 0.25;
   }
   
@@ -539,10 +400,7 @@ function playMenuMusic() {
 }
 
 function stopMenuMusic() {
-  if (menuMusicInterval) {
-    clearInterval(menuMusicInterval);
-    menuMusicInterval = null;
-  }
+  if (menuMusicInterval) { clearInterval(menuMusicInterval); menuMusicInterval = null; }
   menuMusicPlaying = false;
 }
 
@@ -553,13 +411,10 @@ function toggleMute() {
   if (isMuted) stopMenuMusic();
   else if (menuMusicPlaying) playMenuMusic();
   else {
-    if (!document.getElementById('gameScreen').style.display || document.getElementById('gameScreen').style.display === 'none') {
-      playMenuMusic();
-    }
+    if (!document.getElementById('gameScreen').style.display || document.getElementById('gameScreen').style.display === 'none') playMenuMusic();
   }
 }
 
-/* ================= DECK 210 KARTU ================= */
 function perms(a){
   if(a.length <= 1) return [a.slice()];
   const r = [];
@@ -593,7 +448,6 @@ function edges(q){
   return { N:[q[0],q[1]], E:[q[1],q[2]], S:[q[3],q[2]], W:[q[0],q[3]] };
 }
 
-/* ================= STATE ================= */
 let S = null;
 const key = (x,y) => x+","+y;
 const DIRS = { N:[0,-1], E:[1,0], S:[0,1], W:[-1,0] };
@@ -612,19 +466,9 @@ function newGame(mode){
   const handRotations = hands.map(hand => hand.map(() => 0));
   
   S = {
-    mode: mode,
-    hands,
-    handRotations,
-    draw: deck,
-    board,
-    turn: 0,
-    locked: false,
-    selected: -1,
-    selRot: 0,
-    newCard: null,
-    animating: false,
-    showClue: false,
-    clueTimeout: null
+    mode: mode, hands, handRotations, draw: deck, board, turn: 0,
+    locked: false, selected: -1, selRot: 0, newCard: null, animating: false,
+    showClue: false, clueTimeout: null
   };
   viewState = { scale: 1, x: 0, y: 0 };
   log("Permainan dimulai! Player 1 jalan pertama.");
@@ -667,7 +511,6 @@ function legalMoves(hand){
   return out;
 }
 
-/* ================= RENDER ================= */
 const boardEl = document.getElementById("board");
 const handP1El = document.getElementById("handPlayer1");
 const handP2El = document.getElementById("handPlayer2");
@@ -702,9 +545,7 @@ function renderBoard(){
   if(!S.locked && !S.animating && S.showClue){
     const curPlayer = S.turn;
     const hand = S.hands[curPlayer];
-    for(const m of legalMoves(hand)){
-      legalSet.add(key(m.x,m.y));
-    }
+    for(const m of legalMoves(hand)) legalSet.add(key(m.x,m.y));
   }
   
   let xs = cells.map(c=>c[0]), ys = cells.map(c=>c[1]);
@@ -751,9 +592,7 @@ function fitBoard(){
   }
   baseFitScale = scale;
   
-  if(viewState.scale === 1 || viewState.scale === baseFitScale) {
-      viewState.scale = baseFitScale;
-  }
+  if(viewState.scale === 1 || viewState.scale === baseFitScale) viewState.scale = baseFitScale;
 }
 
 function applyTransform(){
@@ -806,11 +645,7 @@ function renderHands(){
     h2 += cardHTML(rotated(c, rot), "handCard"+(S.turn===1 && S.selected===i?" selected":""), 'data-i="'+i+'"');
   });
   handP2El.innerHTML = h2;
-  if(S.mode === 'pvp') {
-    handP2El.querySelectorAll(".handCard").forEach(el=>{
-      attachDrag(el, 1, +el.dataset.i);
-    });
-  }
+  if(S.mode === 'pvp') handP2El.querySelectorAll(".handCard").forEach(el=> attachDrag(el, 1, +el.dataset.i));
 }
 
 function updateHandSelectionUI(){
@@ -824,7 +659,6 @@ function updateHandSelectionUI(){
 
 function renderStatus(){
   document.getElementById("opponentInfo").textContent = (S.mode==='pvp' ? "Player 2" : "Komputer") + " (" + S.hands[1].length + " kartu)";
-  
   drawPileCountEl.textContent = S.draw.length + " kartu yang tersisa";
 
   const btn1 = document.getElementById("btnDraw1");
@@ -875,16 +709,10 @@ function animateMoveCard(fromElement, toElement, cardQ, callback){
     fly.style.left = toRect.left + 'px';
     fly.style.top = toRect.top + 'px';
     fly.style.transform = 'scale(1.15) rotate(5deg)';
-    
-    setTimeout(() => {
-      fly.style.transform = 'scale(1) rotate(0deg)';
-    }, 250);
+    setTimeout(() => { fly.style.transform = 'scale(1) rotate(0deg)'; }, 250);
   });
 
-  setTimeout(() => {
-    fly.remove();
-    callback();
-  }, 550);
+  setTimeout(() => { fly.remove(); callback(); }, 550);
 }
 
 function animateDrawToHand(playerIndex, callback){
@@ -911,10 +739,7 @@ function animateDrawToHand(playerIndex, callback){
     fly.style.left = toRect.left + 'px';
     fly.style.top = toRect.top + 'px';
     fly.style.transform = 'scale(1.2)';
-    
-    setTimeout(() => {
-      fly.style.transform = 'scale(1)';
-    }, 250);
+    setTimeout(() => { fly.style.transform = 'scale(1)'; }, 250);
   });
   
   setTimeout(() => {
@@ -933,27 +758,20 @@ function attachDrag(el, pid, cardIndex){
   el.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if(S.locked || S.animating || S.turn !== pid) return;
-
-    startX = e.clientX;
-    startY = e.clientY;
+    startX = e.clientX; startY = e.clientY;
     isDragging = false;
     SoundEffects.click();
-
-    try {
-      el.setPointerCapture(e.pointerId);
-    } catch(err) {}
+    try { el.setPointerCapture(e.pointerId); } catch(err) {}
   });
 
   el.addEventListener('pointermove', (e) => {
     if(S.locked || S.animating || S.turn !== pid) return;
-
     if(!isDragging){
       const dx = Math.abs(e.clientX - startX);
       const dy = Math.abs(e.clientY - startY);
       if(dx + dy > 5){
         isDragging = true;
         e.preventDefault();
-
         if(S.selected !== cardIndex){
           S.selected = cardIndex;
           S.selRot = S.handRotations[pid][cardIndex];
@@ -961,7 +779,6 @@ function attachDrag(el, pid, cardIndex){
         }
         updateHandSelectionUI();
         renderBoard();
-
         dragCard = document.createElement('div');
         dragCard.className = 'dragging-card';
         const q = S.hands[pid][cardIndex];
@@ -970,12 +787,10 @@ function attachDrag(el, pid, cardIndex){
         dragCard.style.left = (e.clientX - 30) + 'px';
         dragCard.style.top = (e.clientY - 30) + 'px';
         document.body.appendChild(dragCard);
-
         el.style.opacity = '0';
         document.body.classList.add('interaction-dragging');
       }
     }
-
     if(isDragging && dragCard){
       dragCard.style.left = (e.clientX - 30) + 'px';
       dragCard.style.top = (e.clientY - 30) + 'px';
@@ -984,23 +799,15 @@ function attachDrag(el, pid, cardIndex){
 
   el.addEventListener('pointerup', (e) => {
     if(S.locked || S.animating || S.turn !== pid) return;
-
     el.style.opacity = '1';
     document.body.classList.remove('interaction-dragging');
-
-    if(!isDragging){
-      onHandClick(pid, cardIndex);
-      return;
-    }
-
+    if(!isDragging){ onHandClick(pid, cardIndex); return; }
     isDragging = false;
-
     if(dragCard) dragCard.remove();
     dragCard = null;
 
     const targetElement = document.elementFromPoint(e.clientX, e.clientY);
     let targetCell = null;
-
     if(targetElement){
       let temp = targetElement;
       while(temp && temp !== document.body){
@@ -1011,17 +818,14 @@ function attachDrag(el, pid, cardIndex){
         temp = temp.parentElement;
       }
     }
-
     if(targetCell){
       const x = +targetCell.dataset.x;
       const y = +targetCell.dataset.y;
       const q = rotated(S.hands[pid][cardIndex], S.selRot);
       if(canPlace(x, y, q) > 0){
         SoundEffects.dropValid();
-        S.animating = true;
-        S.locked = true;
+        S.animating = true; S.locked = true;
         document.body.classList.add('interaction-locked');
-
         animateMoveCard(el, targetCell, q, ()=>{
           document.body.classList.remove('interaction-locked');
           S.animating = false;
@@ -1039,18 +843,15 @@ function attachDrag(el, pid, cardIndex){
         fly.style.height = '70px';
         fly.innerHTML = quadDivsHTML(q);
         document.body.appendChild(fly);
-
         requestAnimationFrame(()=>{
           fly.style.left = toRect.left + 'px';
           fly.style.top = toRect.top + 'px';
         });
-
         setTimeout(()=>{
           fly.remove();
           S.selected = -1;
           renderAll();
         }, 550);
-
         log("Kartu tidak valid, kembali ke tangan.", pid===0?"p1":"p2");
       }
     } else {
@@ -1093,22 +894,12 @@ function onCellClick(x, y){
     const boardCells = document.querySelectorAll('.cellEmpty');
     let toCell = null;
     for(const cell of boardCells){
-      if(+cell.dataset.x === x && +cell.dataset.y === y){
-        toCell = cell;
-        break;
-      }
+      if(+cell.dataset.x === x && +cell.dataset.y === y){ toCell = cell; break; }
     }
-
-    if(!fromCard || !toCell){
-      placeCard(pid, S.selected, x, y, q);
-      return;
-    }
-
+    if(!fromCard || !toCell){ placeCard(pid, S.selected, x, y, q); return; }
     SoundEffects.dropValid();
-    S.animating = true;
-    S.locked = true;
+    S.animating = true; S.locked = true;
     document.body.classList.add('interaction-locked');
-
     animateMoveCard(fromCard, toCell, q, ()=>{
       document.body.classList.remove('interaction-locked');
       S.animating = false;
@@ -1153,8 +944,7 @@ document.getElementById("btnDraw1").onclick = ()=>{
   const canMove = legalMoves(S.hands[0]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
-    S.animating = true;
-    S.locked = true;
+    S.animating = true; S.locked = true;
     document.body.classList.add('interaction-locked');
     animateDrawToHand(0, ()=>{
       document.body.classList.remove('interaction-locked');
@@ -1173,8 +963,7 @@ document.getElementById("btnDraw2").onclick = ()=>{
   const canMove = legalMoves(S.hands[1]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
-    S.animating = true;
-    S.locked = true;
+    S.animating = true; S.locked = true;
     document.body.classList.add('interaction-locked');
     animateDrawToHand(1, ()=>{
       document.body.classList.remove('interaction-locked');
@@ -1196,18 +985,13 @@ document.getElementById("btnRestart").onclick = ()=>{
   playMenuMusic();
 };
 
-/* ================= GILIRAN ================= */
 function endTurn(pi){
   renderAll();
   if(S.hands[pi].length === 0){
     const winnerNames = pi === 0 ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer");
     showOverlay("Menang: "+winnerNames, "<p>Semua kartu telah habis.</p>");
     S.locked = true;
-    if(pi === 0){
-      SoundEffects.win();
-    } else {
-      SoundEffects.lose();
-    }
+    if(pi === 0){ SoundEffects.win(); } else { SoundEffects.lose(); }
     return;
   }
   if(S.draw.length === 0){
@@ -1225,7 +1009,6 @@ function endTurn(pi){
       return;
     }
   }
-
   S.turn = (pi + 1) % 2;
   S.selected = -1;
   clearTimeout(S.clueTimeout);
@@ -1248,22 +1031,16 @@ function aiTurn(){
     moves.sort((a,b)=> b.contacts - a.contacts);
     const best = moves.filter(m=> m.contacts === moves[0].contacts);
     const m = best[Math.floor(Math.random()*best.length)];
-
     const card = hand[m.ci];
     const q = rotated(card, m.rot);
     const fromCard = handP2El.children[m.ci];
     const boardCells = document.querySelectorAll('.cellEmpty');
     let toCell = null;
     for(const cell of boardCells){
-      if(+cell.dataset.x === m.x && +cell.dataset.y === m.y){
-        toCell = cell;
-        break;
-      }
+      if(+cell.dataset.x === m.x && +cell.dataset.y === m.y){ toCell = cell; break; }
     }
-
     if(fromCard && toCell){
-      S.animating = true;
-      S.locked = true;
+      S.animating = true; S.locked = true;
       document.body.classList.add('interaction-locked');
       animateMoveCard(fromCard, toCell, q, ()=>{
         document.body.classList.remove('interaction-locked');
@@ -1274,8 +1051,7 @@ function aiTurn(){
       placeCard(1, m.ci, m.x, m.y, q);
     }
   } else if(S.draw.length > 0){
-    S.animating = true;
-    S.locked = true;
+    S.animating = true; S.locked = true;
     document.body.classList.add('interaction-locked');
     animateDrawToHand(1, ()=>{
       document.body.classList.remove('interaction-locked');
