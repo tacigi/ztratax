@@ -9,11 +9,15 @@
     --accent:#1F6FEB; --primary:#1A1A1A; --bg:#2B2B2B; --panel:#FFFFFF;
     --border:#D0D7DE; --text:#24292F; --danger:#D6373A; --ok:#2E9E44;
     --table:#3E7C4F; --table-border:#2B5A36;
+    --card-size:70px;
+    --hand-card-size:60px;
+    --nav-btn-size:35px;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   body{
     font-family:'Segoe UI', Arial, sans-serif; background:var(--bg); color:var(--text);
     min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:12px;
+    overflow-x:hidden;
   }
   h1{font-size:24px; letter-spacing:3px; color:#fff; text-align:center; margin-top:5px; text-shadow:2px 2px 4px rgba(0,0,0,.5);}
   .subtitle{font-size:12px; color:#ccc; font-weight:600; text-align:center; margin-bottom:10px;}
@@ -58,12 +62,12 @@
   }
   #board{position:relative; transform-origin: center center;}
 
-  .cellEmpty{position:absolute; width:70px; height:70px; border:1px dashed rgba(255,255,255,.6); border-radius:6px;}
+  .cellEmpty{position:absolute; width:var(--card-size); height:var(--card-size); border:1px dashed rgba(255,255,255,.6); border-radius:6px;}
   .cellEmpty.legal{cursor:pointer; background:rgba(31,111,235,.5); border:2px solid var(--accent); animation:pulse 1s infinite;}
   .cellEmpty.legal:hover{background:rgba(31,111,235,.7);}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,235,.6);}50%{box-shadow:0 0 0 8px rgba(31,111,235,0);}}
 
-  .card{position:absolute; width:70px; height:70px; display:grid; grid-template-columns:1fr 1fr;
+  .card{position:absolute; width:var(--card-size); height:var(--card-size); display:grid; grid-template-columns:1fr 1fr;
     grid-template-rows:1fr 1fr; border:2px solid var(--primary); border-radius:6px; overflow:hidden;
     background:#fff; box-shadow:0 4px 8px rgba(0,0,0,.3);}
   .card .q{width:100%; height:100%;}
@@ -87,7 +91,7 @@
 
   .dragging-card{
     position: fixed; z-index: 1000; pointer-events: none;
-    width: 60px; height: 60px;
+    width: var(--hand-card-size); height: var(--hand-card-size);
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
     border: 2px solid var(--accent); border-radius: 6px; overflow: hidden;
     background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,.45);
@@ -112,8 +116,8 @@
     border: none;
   }
   .draw-pile img{
-    width: 70px;
-    height: 70px;
+    width: var(--card-size);
+    height: var(--card-size);
     border-radius: 6px;
     box-shadow: 0 6px 12px rgba(0,0,0,.4);
   }
@@ -137,10 +141,10 @@
 
   .handSection{margin:10px 0;}
   .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:5px; text-align:center; text-shadow:1px 1px 2px black;}
-  #handPlayer1{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
-  #handPlayer2{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:70px;}
+  #handPlayer1{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:var(--hand-card-size);}
+  #handPlayer2{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:var(--hand-card-size);}
 
-  .handCard{width:60px; height:60px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
+  .handCard{width:var(--hand-card-size); height:var(--hand-card-size); display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
     border:2px solid var(--primary); border-radius:6px; overflow:hidden; cursor:pointer; background:#fff;
     box-shadow:0 4px 8px rgba(0,0,0,.25); transition:transform .2s ease, box-shadow .2s ease;}
   .handCard:hover{transform:translateY(-4px); box-shadow:0 8px 14px rgba(0,0,0,.3);}
@@ -185,18 +189,14 @@
     overflow: hidden;
   }
 
-  @media (max-width:560px){
-    .card,.cellEmpty{width:56px;height:56px;} .handCard{width:50px;height:50px;}
-  }
-
-  /* ===== KONTROL NAVIGASI 3x3 (PERBAIKAN) ===== */
+  /* ===== KONTROL NAVIGASI 3x3 ===== */
   #boardControls{
     position: absolute;
     bottom: 10px;
     right: 10px;
     display: grid;
-    grid-template-columns: repeat(3, 35px);
-    grid-template-rows: repeat(3, 35px);
+    grid-template-columns: repeat(3, var(--nav-btn-size));
+    grid-template-rows: repeat(3, var(--nav-btn-size));
     grid-template-areas:
       "minus up plus"
       "left home right"
@@ -208,8 +208,8 @@
     z-index: 10;
   }
   .nav-btn{
-    width: 35px;
-    height: 35px;
+    width: var(--nav-btn-size);
+    height: var(--nav-btn-size);
     background: #fff;
     border: none;
     border-radius: 4px;
@@ -226,6 +226,49 @@
   }
   .nav-btn:hover{ background: #e0e0e0; }
   .nav-btn:active{ background: #ccc; }
+
+  /* ===== RESPONSIVE UNTUK LAYAR KECIL ===== */
+  @media (max-width: 768px) {
+    :root {
+      --card-size: 56px;
+      --hand-card-size: 50px;
+      --nav-btn-size: 30px;
+    }
+    body { padding: 8px; }
+    h1 { font-size: 20px; letter-spacing: 2px; }
+    .subtitle { font-size: 11px; }
+    #table { padding: 10px; border-width: 4px; border-radius: 14px; }
+    #boardWrap { padding: 10px; min-height: 180px; max-height: 40vh; }
+    .draw-pile img { width: var(--card-size); height: var(--card-size); }
+    .draw-pile span { font-size: 10px; }
+    #drawPileContainer { margin-left: 10px; }
+    #startScreen { padding: 25px; }
+    .modeBtn { padding: 10px 16px; font-size: 14px; }
+    .bigBtn { padding: 12px 28px; font-size: 14px; }
+    .rulesBox { font-size: 11px; }
+  }
+
+  @media (max-width: 480px) {
+    :root {
+      --card-size: 48px;
+      --hand-card-size: 44px;
+      --nav-btn-size: 26px;
+    }
+    body { padding: 6px; }
+    h1 { font-size: 18px; }
+    .subtitle { font-size: 10px; }
+    #table { padding: 8px; border-width: 3px; border-radius: 12px; }
+    #boardWrap { padding: 8px; min-height: 150px; max-height: 35vh; }
+    .draw-pile img { width: var(--card-size); height: var(--card-size); }
+    .draw-pile span { font-size: 9px; }
+    #drawPileContainer { margin-left: 5px; }
+    #startScreen { padding: 20px; }
+    .modeBtn { padding: 8px 12px; font-size: 13px; }
+    .bigBtn { padding: 10px 22px; font-size: 13px; }
+    .rulesBox { font-size: 10px; padding: 10px; }
+    .ctrlBtn { padding: 6px 10px; font-size: 12px; }
+    #log { font-size: 11px; }
+  }
 </style>
 </head>
 <body>
