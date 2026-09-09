@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QUADRAN ZTRATAX - Meja Permainan</title>
 <style>
-  /* CSS SAMA SEPERTI SEBELUMNYA - TIDAK BERUBAH */
   :root{
     --accent:#1F6FEB; --primary:#1A1A1A; --bg:#2B2B2B; --panel:#FFFFFF;
     --border:#D0D7DE; --text:#24292F; --danger:#D6373A; --ok:#2E9E44;
@@ -19,6 +18,7 @@
   h1{font-size:24px; letter-spacing:3px; color:#fff; text-align:center; margin-top:5px; text-shadow:2px 2px 4px rgba(0,0,0,.5);}
   .subtitle{font-size:12px; color:#ccc; font-weight:600; text-align:center; margin-bottom:10px;}
 
+  /* ---------- LAYAR AWAL ---------- */
   #startScreen{display:flex; flex-direction:column; align-items:center; gap:18px; margin-top:6vh;
     background:var(--panel); padding:35px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3); max-width:450px; width:100%;}
   #startScreen h2{font-size:18px; margin-bottom:10px;}
@@ -34,6 +34,7 @@
   .rulesBox{font-size:12px; line-height:1.6; background:#fafafa; border:1px dashed var(--border); border-radius:8px; padding:14px; text-align:left;}
   .rulesBox b{color:var(--primary);}
 
+  /* ---------- PAPAN PERMAINAN ---------- */
   #gameScreen{display:none; width:100%; max-width:1100px; flex-direction:column; align-items:center;}
   #table{
     width:100%; background:var(--table); border:6px solid var(--table-border); border-radius:20px;
@@ -102,6 +103,7 @@
     margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,.3);
   }
 
+  /* ---------- KONTROL NAVIGASI & ZOOM (FORMAT BARU) ---------- */
   #boardControls{
     position: absolute;
     bottom: 10px;
@@ -110,7 +112,7 @@
     grid-template-areas: 
       "minus up plus"
       "left home right"
-      ". down .";
+      "clue down mute";
     grid-template-columns: repeat(3, 35px);
     grid-template-rows: repeat(3, 35px);
     gap: 4px;
@@ -176,6 +178,7 @@
     pointer-events:none;
   }
 
+  /* ===== PERBAIKAN UNTUK PERANGKAT SENTUH ===== */
   .handCard, .card, .cellEmpty, #board, #boardWrap, #handPlayer1, #handPlayer2, .draw-pile {
     touch-action: none !important;
     -webkit-user-select: none !important;
@@ -205,7 +208,7 @@
   </div>
   <button class="bigBtn" id="btnStart">Mulai Permainan</button>
   <div class="rulesBox">
-    <b>Cara main:</b> Klik kartu untuk memilih, lalu tekan R untuk rotasi. Atau drag kartu langsung ke sel papan. Gunakan tombol panah di pojok kanan bawah papan untuk menggeser tampilan jika di-zoom.
+    <b>Cara main:</b> Klik kartu untuk memilih, lalu tekan R untuk rotasi. Atau drag kartu langsung ke sel papan. Gunakan tombol panah di pojok kanan bawah papan untuk menggeser tampilan jika di-zoom. Tekan 💡 untuk melihat semua kemungkinan langkah, dan 🔊 untuk mute suara.
   </div>
 </div>
 
@@ -235,7 +238,9 @@
         <button class="nav-btn" style="grid-area: left" onclick="pan(50, 0)">←</button>
         <button class="nav-btn" style="grid-area: home" onclick="resetView()">🏠</button>
         <button class="nav-btn" style="grid-area: right" onclick="pan(-50, 0)">→</button>
+        <button class="nav-btn" style="grid-area: clue" onclick="showClue()" title="Tampilkan Petunjuk">💡</button>
         <button class="nav-btn" style="grid-area: down" onclick="pan(0, -50)">↓</button>
+        <button class="nav-btn" style="grid-area: mute" onclick="toggleMute()" title="Mute/Unmute">🔊</button>
       </div>
     </div>
     
@@ -288,6 +293,7 @@ const VAL = [1,2,3,4,5,6,7];
 /* ================= AUDIO SYSTEM ================= */
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
+let isMuted = false; // Variabel mute global
 
 function initAudio(){
   if(!audioCtx){
@@ -299,7 +305,7 @@ function initAudio(){
 }
 
 function playTone(freq, duration, type = 'sine', volume = 0.3, delay = 0){
-  if(!audioCtx) return;
+  if(!audioCtx || isMuted) return; // Cek mute
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = type;
@@ -313,7 +319,7 @@ function playTone(freq, duration, type = 'sine', volume = 0.3, delay = 0){
 }
 
 function playNoise(duration, volume = 0.2, delay = 0){
-  if(!audioCtx) return;
+  if(!audioCtx || isMuted) return; // Cek mute
   const bufferSize = audioCtx.sampleRate * duration;
   const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
   const data = buffer.getChannelData(0);
@@ -365,7 +371,7 @@ let menuMusicInterval = null;
 let menuMusicPlaying = false;
 
 function scheduleMenuNote(freq, time, duration, volume = 0.2, type = 'square') {
-  if (!audioCtx) return;
+  if (!audioCtx || isMuted) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = type;
@@ -422,6 +428,22 @@ function stopMenuMusic() {
     menuMusicInterval = null;
   }
   menuMusicPlaying = false;
+}
+
+/* Fungsi untuk toggle mute */
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.querySelector('[style*="grid-area: mute"]');
+  if (btn) btn.textContent = isMuted ? '🔇' : '🔊';
+  // Jika di-mute, hentikan musik menu juga (agar tidak ada suara)
+  if (isMuted) stopMenuMusic();
+  else if (menuMusicPlaying) playMenuMusic();
+  else {
+    // Jika tidak diputar dan sedang di menu, mulai lagi
+    if (!document.getElementById('gameScreen').style.display || document.getElementById('gameScreen').style.display === 'none') {
+      playMenuMusic();
+    }
+  }
 }
 
 /* ================= DECK 210 KARTU ================= */
@@ -487,7 +509,9 @@ function newGame(mode){
     selected: -1,
     selRot: 0,
     newCard: null,
-    animating: false
+    animating: false,
+    showClue: false, // Tambahan state untuk mode clue
+    clueTimeout: null // Timeout untuk clue
   };
   viewState = { scale: 1, x: 0, y: 0 };
   log("Permainan dimulai! Player 1 jalan pertama.");
@@ -547,17 +571,34 @@ function cardHTML(q, cls, style){
   return '<div class="'+cls+'" '+(style||"")+'>'+quadDivsHTML(q)+'</div>';
 }
 
+/* Fungsi untuk menampilkan petunjuk (clue) */
+function showClue() {
+  if(S.locked || S.animating) return;
+  S.showClue = true;
+  renderBoard();
+  // Hilangkan clue setelah 3 detik
+  clearTimeout(S.clueTimeout);
+  S.clueTimeout = setTimeout(()=>{
+    S.showClue = false;
+    renderBoard();
+  }, 3000);
+  // Efek suara
+  SoundEffects.select();
+}
+
 function renderBoard(){
   const cells = [...S.board.keys()].map(k=>k.split(",").map(Number));
   const legalSet = new Set();
-  if(S.selected >= 0 && !S.locked && !S.animating){
+  // Jika mode clue aktif, tampilkan semua langkah untuk semua kartu di tangan pemain saat ini
+  if(!S.locked && !S.animating && S.showClue){
     const curPlayer = S.turn;
-    if(curPlayer === 0) {
-      for(const m of legalMoves(S.hands[0])) legalSet.add(key(m.x,m.y));
-    } else {
-      for(const m of legalMoves(S.hands[1])) legalSet.add(key(m.x,m.y));
+    const hand = S.hands[curPlayer];
+    for(const m of legalMoves(hand)){
+      legalSet.add(key(m.x,m.y));
     }
   }
+  // (Catatan: default tidak lagi menampilkan legal moves saat kartu dipilih)
+  
   let xs = cells.map(c=>c[0]), ys = cells.map(c=>c[1]);
   for(const k of legalSet){ const [x,y]=k.split(",").map(Number); xs.push(x); ys.push(y); }
   const minX=Math.min(...xs)-1, maxX=Math.max(...xs)+1, minY=Math.min(...ys)-1, maxY=Math.max(...ys)+1;
@@ -1083,6 +1124,9 @@ function endTurn(pi){
 
   S.turn = (pi + 1) % 2;
   S.selected = -1;
+  // Matikan mode clue saat berganti giliran
+  clearTimeout(S.clueTimeout);
+  S.showClue = false;
   if(S.turn === 1 && S.mode === 'pve'){
     S.locked = true;
     renderAll();
