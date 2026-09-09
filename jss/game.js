@@ -2,15 +2,85 @@
 
 /* ================= DATA & KONSTANTA ================= */
 const COLORS = [
-  {n:"Putih",  h:"#EDEDED", t:"#000"},
-  {n:"Biru",   h:"#1F6FEB", t:"#fff"},
-  {n:"Kuning", h:"#F2B705", t:"#000"},
-  {n:"Hijau",  h:"#2E9E44", t:"#fff"},
-  {n:"Ungu",   h:"#8B3FD1", t:"#fff"},
-  {n:"Merah",  h:"#D6373A", t:"#fff"},
-  {n:"Hitam",  h:"#1A1A1A", t:"#fff"},
+  {n:"Putih",  h:"#EDEDED", t:"#000", val:1},
+  {n:"Biru",   h:"#1F6FEB", t:"#fff", val:2},
+  {n:"Kuning", h:"#F2B705", t:"#000", val:3},
+  {n:"Hijau",  h:"#2E9E44", t:"#fff", val:4},
+  {n:"Ungu",   h:"#8B3FD1", t:"#fff", val:5},
+  {n:"Merah",  h:"#D6373A", t:"#fff", val:6},
+  {n:"Hitam",  h:"#1A1A1A", t:"#fff", val:7},
 ];
 const VAL = [1,2,3,4,5,6,7];
+const CARD_VALUE = (q) => q.reduce((s,c)=>s+COLORS[c].val, 0);
+
+/* ================= STATISTIK & LOCALSTORAGE ================= */
+const STORAGE_KEY = 'quadran_ztratax_stats_v1';
+
+function loadStats() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : defaultStats();
+  } catch(e) {
+    return defaultStats();
+  }
+}
+
+function saveStats(stats) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+}
+
+function defaultStats() {
+  return {
+    pvp: {
+      p1: { playCount:0, winCount:0, totalScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0 },
+      p2: { playCount:0, winCount:0, totalScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0 }
+    },
+    pve: {
+      player: { playCount:0, winCount:0, totalScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0 },
+      computer: { playCount:0, winCount:0, totalScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0 }
+    },
+    history: []
+  };
+}
+
+let globalStats = loadStats();
+
+function updateStats(mode, winnerIndex, scoreP1, scoreP2, playedValueP1, playedValueP2, remainingValueP1, remainingValueP2, duration, cluesUsedP1, cluesUsedP2, drawsP1, drawsP2) {
+  const stats = globalStats;
+  const key = mode === 'pvp' ? 'pvp' : 'pve';
+  let p1Key, p2Key;
+  if (mode === 'pvp') {
+    p1Key = 'p1'; p2Key = 'p2';
+  } else {
+    p1Key = 'player'; p2Key = 'computer';
+  }
+  stats[key][p1Key].playCount++;
+  stats[key][p2Key].playCount++;
+  if (winnerIndex === 0) stats[key][p1Key].winCount++;
+  else stats[key][p2Key].winCount++;
+  stats[key][p1Key].totalScore += scoreP1;
+  stats[key][p2Key].totalScore += scoreP2;
+  stats[key][p1Key].totalCardsPlayedValue += playedValueP1;
+  stats[key][p2Key].totalCardsPlayedValue += playedValueP2;
+  stats[key][p1Key].totalCardsRemainingValue += remainingValueP1;
+  stats[key][p2Key].totalCardsRemainingValue += remainingValueP2;
+
+  const historyEntry = {
+    timestamp: new Date().toISOString(),
+    mode: mode,
+    winner: winnerIndex,
+    duration: duration,
+    scoreP1, scoreP2,
+    playedValueP1, playedValueP2,
+    remainingValueP1, remainingValueP2,
+    cluesUsedP1, cluesUsedP2,
+    drawsP1, drawsP2
+  };
+  stats.history.unshift(historyEntry);
+  if (stats.history.length > 50) stats.history = stats.history.slice(0, 50);
+
+  saveStats(stats);
+}
 
 /* ================= DECK 210 KARTU ================= */
 function perms(a){
@@ -40,7 +110,7 @@ function shuffle(a){
 }
 const rotCW = q => [q[3], q[0], q[1], q[2]];
 function rotated(q, r){ let x=q.slice(); for(let i=0;i<r;i++) x=rotCW(x); return x; }
-function cardValue(q){ return q.reduce((s,c)=>s+VAL[c], 0); }
+function cardValue(q){ return CARD_VALUE(q); }
 function edges(q){
   return { N:[q[0],q[1]], E:[q[1],q[2]], S:[q[3],q[2]], W:[q[0],q[3]] };
 }
@@ -56,6 +126,12 @@ let baseFitScale = 1;
 
 let gamePaused = false;
 let gameLogs = [];
+let currentScores = { p1:0, p2:0 };
+let currentClues = { p1:0, p2:0 };
+let currentDraws = { p1:0, p2:0 };
+let currentPlayedValue = { p1:0, p2:0 };
+let gameStartTime = 0;
+let gameDuration = 0;
 
 /* ================= LOG ================= */
 function addLog(msg, who){
@@ -93,6 +169,43 @@ function changeMode(){
   playMenuMusic();
 }
 
+function openStatsModal(){
+  const stats = globalStats;
+  const mode = S.mode;
+  const key = mode === 'pvp' ? 'pvp' : 'pve';
+  let p1Name, p2Name, p1Stats, p2Stats;
+  if (mode === 'pvp') {
+    p1Name = "Player 1"; p2Name = "Player 2";
+    p1Stats = stats.pvp.p1; p2Stats = stats.pvp.p2;
+  } else {
+    p1Name = "Player"; p2Name = "Computer";
+    p1Stats = stats.pve.player; p2Stats = stats.pve.computer;
+  }
+  const winRate = (st) => st.playCount > 0 ? (st.winCount / st.playCount * 100).toFixed(1) : '0';
+  const html = `
+    <h3>Statistik ${mode === 'pvp' ? 'PvP' : 'PvE'}</h3>
+    <table>
+      <tr><th>Metrik</th><th>${p1Name}</th><th>${p2Name}</th></tr>
+      <tr><td>Play Count</td><td>${p1Stats.playCount}</td><td>${p2Stats.playCount}</td></tr>
+      <tr><td>Win Count</td><td>${p1Stats.winCount}</td><td>${p2Stats.winCount}</td></tr>
+      <tr><td>Win Rate</td><td>${winRate(p1Stats)}%</td><td>${winRate(p2Stats)}%</td></tr>
+      <tr><td>Total Skor</td><td>${p1Stats.totalScore}</td><td>${p2Stats.totalScore}</td></tr>
+      <tr><td>Nilai Kartu Dimainkan</td><td>${p1Stats.totalCardsPlayedValue}</td><td>${p2Stats.totalCardsPlayedValue}</td></tr>
+      <tr><td>Nilai Kartu Sisa</td><td>${p1Stats.totalCardsRemainingValue}</td><td>${p2Stats.totalCardsRemainingValue}</td></tr>
+    </table>
+    <h4>Riwayat (5 terakhir)</h4>
+    <ul>
+      ${stats.history.slice(0,5).map(h=>`<li>${new Date(h.timestamp).toLocaleString()} - ${h.mode} - Winner: ${h.winner===0?'P1':'P2'}</li>`).join('') || 'Belum ada riwayat'}
+    </ul>
+  `;
+  document.getElementById('statsContent').innerHTML = html;
+  document.getElementById('statsOverlay').style.display = 'flex';
+}
+
+function closeStatsModal(){
+  document.getElementById('statsOverlay').style.display = 'none';
+}
+
 /* ================= NEW GAME ================= */
 function newGame(mode){
   const deck = shuffle(buildDeck());
@@ -109,6 +222,11 @@ function newGame(mode){
     showClue: false, clueTimeout: null
   };
   viewState = { scale: 1, x: 0, y: 0 };
+  currentScores = { p1:0, p2:0 };
+  currentClues = { p1:0, p2:0 };
+  currentDraws = { p1:0, p2:0 };
+  currentPlayedValue = { p1:0, p2:0 };
+  gameStartTime = Date.now();
   addLog("Permainan dimulai! Player 1 jalan pertama.");
   renderAll();
 }
@@ -149,6 +267,24 @@ function legalMoves(hand){
   return out;
 }
 
+/* Deteksi combo untuk kartu terakhir */
+function detectCombo(x, y) {
+  function hasCells(cells) {
+    return cells.every(([cx,cy]) => S.board.has(key(cx,cy)));
+  }
+  // Persegi 2x2
+  if (hasCells([[x,y],[x+1,y],[x,y+1],[x+1,y+1]])) return 10;
+  // Persegi panjang 2x3 / 3x2
+  if (hasCells([[x,y],[x+1,y],[x+2,y],[x,y+1],[x+1,y+1],[x+2,y+1]])) return 20;
+  if (hasCells([[x,y],[x+1,y],[x,y+1],[x+1,y+1],[x,y+2],[x+1,y+2]])) return 20;
+  // L shape (8) – berbagai orientasi
+  if (hasCells([[x,y],[x+1,y],[x+2,y],[x,y+1],[x+1,y+1],[x+2,y+1],[x,y+2],[x+1,y+2]])) return 30;
+  if (hasCells([[x,y],[x+1,y],[x+2,y],[x,y+1],[x+1,y+1],[x+2,y+1],[x+1,y+2],[x+2,y+2]])) return 30;
+  // Square 3x3
+  if (hasCells([[x,y],[x+1,y],[x+2,y],[x,y+1],[x+1,y+1],[x+2,y+1],[x,y+2],[x+1,y+2],[x+2,y+2]])) return 40;
+  return 0;
+}
+
 /* ================= RENDER ================= */
 const boardEl = document.getElementById("board");
 const handP1El = document.getElementById("handPlayer1");
@@ -168,6 +304,8 @@ function cardHTML(q, cls, style){
 function showClue() {
   if(S.locked || S.animating || gamePaused) return;
   S.showClue = true;
+  currentClues[S.turn === 0 ? 'p1':'p2']++;
+  currentScores[S.turn === 0 ? 'p1':'p2'] -= 5;
   renderBoard();
   clearTimeout(S.clueTimeout);
   S.clueTimeout = setTimeout(()=>{
@@ -552,6 +690,17 @@ function placeCard(pid, cardIndex, x, y, q){
   S.handRotations[pid].splice(cardIndex, 1);
   S.selected = -1;
   SoundEffects.place();
+  const playerKey = pid === 0 ? 'p1' : 'p2';
+  const cardVal = cardValue(q);
+  currentScores[playerKey] += cardVal;
+  currentPlayedValue[playerKey] += cardVal;
+  if (S.hands[pid].length === 0) {
+    const comboBonus = detectCombo(x, y);
+    if (comboBonus > 0) {
+      currentScores[playerKey] += comboBonus;
+      log(`Combo! +${comboBonus} poin`, playerKey);
+    }
+  }
   log("memasang kartu di ("+x+","+y+").", pid===0 ? "p1" : "p2");
   endTurn(pid);
 }
@@ -575,8 +724,29 @@ function handleRotate(pid){
 function endTurn(pi){
   renderAll();
   if(S.hands[pi].length === 0){
-    const winnerNames = pi === 0 ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer");
-    showOverlay("Menang: "+winnerNames, "<p>Semua kartu telah habis.</p>");
+    gameDuration = Date.now() - gameStartTime;
+    const winnerIndex = pi;
+    const loserIndex = 1 - pi;
+    const remainingValueLoser = S.hands[loserIndex].reduce((s,c)=>s+cardValue(c),0);
+    const playerKeyWinner = winnerIndex === 0 ? 'p1' : 'p2';
+    const playerKeyLoser = loserIndex === 0 ? 'p1' : 'p2';
+    currentScores[playerKeyWinner] += 100;
+    currentScores[playerKeyLoser] -= remainingValueLoser;
+    const remainingValueP1 = winnerIndex === 0 ? 0 : remainingValueLoser;
+    const remainingValueP2 = winnerIndex === 1 ? 0 : remainingValueLoser;
+    updateStats(
+      S.mode, winnerIndex,
+      currentScores.p1, currentScores.p2,
+      currentPlayedValue.p1, currentPlayedValue.p2,
+      remainingValueP1, remainingValueP2,
+      gameDuration,
+      currentClues.p1, currentClues.p2,
+      currentDraws.p1, currentDraws.p2
+    );
+    showOverlay("Menang: "+(winnerIndex===0 ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer")), 
+      `<p>Skor: P1 ${currentScores.p1} - ${currentScores.p2} P2</p>
+       <p>Nilai kartu dimainkan: ${currentPlayedValue.p1} / ${currentPlayedValue.p2}</p>
+       <p>Nilai kartu sisa: ${remainingValueP1} / ${remainingValueP2}</p>`);
     S.locked = true;
     if(pi === 0){ SoundEffects.win(); } else { SoundEffects.lose(); }
     return;
@@ -585,12 +755,28 @@ function endTurn(pi){
     let anyMove = false;
     for(let i=0;i<2;i++) if(legalMoves(S.hands[i]).length > 0){ anyMove = true; break; }
     if(!anyMove){
+      gameDuration = Date.now() - gameStartTime;
       const totals = S.hands.map(h => h.reduce((s,c)=> s + cardValue(c), 0));
       const min = Math.min(...totals);
+      const winners = totals.map((t,i)=>[t,i]).filter(x=>x[0]===min).map(x=>x[1]);
+      const winnerIndex = winners.length === 1 ? winners[0] : (winners.includes(0) ? 0 : 1);
+      const winnerKey = winnerIndex === 0 ? 'p1' : 'p2';
+      currentScores[winnerKey] += 100;
+      const remainingValueP1 = totals[0];
+      const remainingValueP2 = totals[1];
+      updateStats(
+        S.mode, winnerIndex,
+        currentScores.p1, currentScores.p2,
+        currentPlayedValue.p1, currentPlayedValue.p2,
+        remainingValueP1, remainingValueP2,
+        gameDuration,
+        currentClues.p1, currentClues.p2,
+        currentDraws.p1, currentDraws.p2
+      );
       const names = i => i===0 ? "Player 1" : (S.mode==='pvp' ? "Player 2" : "Komputer");
       let body = "<p><b>Buntu.</b> Nilai kartu tersisa:</p>";
       totals.forEach((t,i)=> body += "<p>"+names(i)+": <b>"+t+"</b>"+(t===min?" (menang)":"")+"</p>");
-      showOverlay("Permainan Berakhir", body);
+      showOverlay("Permainan Berakhir", body + `<p>Skor: ${currentScores.p1} / ${currentScores.p2}</p>`);
       S.locked = true;
       SoundEffects.draw();
       return;
@@ -643,6 +829,8 @@ function aiTurn(){
     animateDrawToHand(1, ()=>{
       document.body.classList.remove('interaction-locked');
       S.animating = false;
+      currentDraws.p2++;
+      currentScores.p2 -= 2;
       log("Komputer mengambil 1 kartu.", "p2");
       endTurn(1);
     });
@@ -663,6 +851,8 @@ function showOverlay(title, body){
 document.getElementById('resumeBtn').onclick = closePauseMenu;
 document.getElementById('restartBtn').onclick = restartGame;
 document.getElementById('changeModeBtn').onclick = changeMode;
+document.getElementById('statsBtn').onclick = openStatsModal;
+document.getElementById('closeStatsBtn').onclick = closeStatsModal;
 
 document.getElementById("btnRotate1").onclick = ()=> handleRotate(0);
 document.getElementById("btnRotate2").onclick = ()=> handleRotate(1);
@@ -680,6 +870,8 @@ document.getElementById("btnDraw1").onclick = ()=>{
     animateDrawToHand(0, ()=>{
       document.body.classList.remove('interaction-locked');
       S.animating = false;
+      currentDraws.p1++;
+      currentScores.p1 -= 2;
       log("mengambil 1 kartu.", "p1");
       endTurn(0);
     });
@@ -699,6 +891,8 @@ document.getElementById("btnDraw2").onclick = ()=>{
     animateDrawToHand(1, ()=>{
       document.body.classList.remove('interaction-locked');
       S.animating = false;
+      currentDraws.p2++;
+      currentScores.p2 -= 2;
       log("mengambil 1 kartu.", "p2");
       endTurn(1);
     });
@@ -755,7 +949,6 @@ window.addEventListener('resize', ()=>{
 
 window.addEventListener('beforeunload', stopMenuMusic);
 
-/* Inisialisasi test deck */
 (function test(){
   const d = buildDeck();
   const seen = new Set(d.map(c=>c.join("-")));
