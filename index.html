@@ -48,9 +48,11 @@
   #table{
     width:100%; background:var(--table); border:6px solid var(--table-border); border-radius:20px;
     padding:10px; box-shadow:inset 0 0 30px rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.4);
-    display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden;
+    display:flex; flex-direction:column; flex:1; min-height:0;
+    justify-content:space-between; /* PENTING: Distribusi merata */
+    gap:5px;
   }
-  #opponentArea{display:flex; flex-direction:column; align-items:center; margin-bottom:5px; flex-shrink:0;}
+  #opponentArea{display:flex; flex-direction:column; align-items:center; flex-shrink:0; max-height:30%;}
   #opponentInfo{color:#fff; font-size:14px; margin-bottom:5px; text-shadow:1px 1px 2px black; font-weight:bold;}
 
   #boardWrap{
@@ -97,7 +99,7 @@
   }
 
   #drawPileContainer{
-    display: flex; flex-direction: column; align-items: center; justify-content: center; margin-left: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; margin-left: 10px; flex-shrink:0;
   }
   .draw-pile{
     display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none;
@@ -109,12 +111,12 @@
     color: #fff; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,.8); margin-top: 4px; text-align: center; white-space: nowrap;
   }
 
-  #player1Area{display:flex; flex-direction:row; justify-content:center; align-items:center; margin-top:5px; flex-shrink:0;}
+  #player1Area{display:flex; flex-direction:row; justify-content:center; align-items:center; flex-shrink:0; max-height:35%;}
 
   .handSection{margin:5px 0;}
   .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:3px; text-align:center; text-shadow:1px 1px 2px black;}
-  #handPlayer1{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; min-height:var(--hand-card-size);}
-  #handPlayer2{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; min-height:var(--hand-card-size);}
+  #handPlayer1{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; overflow:hidden; min-height:var(--hand-card-size);}
+  #handPlayer2{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; overflow:hidden; min-height:var(--hand-card-size);}
 
   .handCard{width:var(--hand-card-size); height:var(--hand-card-size); display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
     border:2px solid var(--primary); border-radius:6px; overflow:hidden; cursor:pointer; background:#fff;
@@ -131,14 +133,11 @@
   .ctrlBtn:disabled{opacity:.4; cursor:not-allowed;}
   .ctrlBtn.primary:disabled{opacity:.4;}
 
-  /* Hapus log dan restartBar */
-
   #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:50; align-items:center; justify-content:center;}
   #overlay .box{background:#fff; border-radius:14px; padding:30px 40px; text-align:center; max-width:90%;}
   #overlay h2{font-size:22px; margin-bottom:10px;}
   #overlay p{font-size:14px; margin-bottom:6px;}
 
-  /* Popup Pause */
   #pauseOverlay{
     display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:60;
     align-items:center; justify-content:center;
@@ -178,7 +177,6 @@
   }
   .nav-btn:hover{ background: #e0e0e0; } .nav-btn:active{ background: #ccc; }
 
-  /* CEgah Double-Tap Zoom di Ponsel/Tablet */
   body, #gameScreen, #table, #boardWrap, #handPlayer1, #handPlayer2, #startScreen, .ctrlBtn, .nav-btn, .bigBtn, .modeBtn {
     touch-action: manipulation !important; -webkit-user-select: none; user-select: none;
   }
@@ -204,6 +202,20 @@
     :root { --card-size: 56px; --hand-card-size: 50px; --nav-btn-size: 30px; }
     h1 { font-size: 20px; margin-top: 2px; } .subtitle { font-size: 11px; margin-bottom: 5px; }
     #table { padding: 8px; border-width: 4px; } #boardWrap { padding: 8px; }
+  }
+  /* Khusus Tablet Portrait */
+  @media (orientation: portrait) and (max-width: 1024px) {
+    :root { --card-size: 54px; --hand-card-size: 48px; --nav-btn-size: 28px; }
+    body { padding: 6px; }
+    h1 { font-size: 20px; margin-top: 2px; }
+    .subtitle { font-size: 11px; margin-bottom: 5px; }
+    #table { padding: 6px; border-width: 4px; border-radius: 14px; }
+    #boardWrap { padding: 6px; }
+    .draw-pile img { width: var(--card-size); height: var(--card-size); }
+    .draw-pile span { font-size: 10px; }
+    #drawPileContainer { margin-left: 5px; }
+    #opponentArea, #player1Area { max-height: 35%; }
+    .handLabel { font-size: 12px; margin-bottom: 2px; }
   }
 </style>
 </head>
@@ -270,7 +282,6 @@
   </div>
 </div>
 
-<!-- Popup Pause -->
 <div id="pauseOverlay">
   <div class="box">
     <h2>⏸ Pause</h2>
@@ -283,7 +294,6 @@
   </div>
 </div>
 
-<!-- Overlay Hasil (tetap ada) -->
 <div id="overlay">
   <div class="box">
     <h2 id="ovTitle"></h2>
@@ -425,26 +435,21 @@ function stopMenuMusic() {
   menuMusicPlaying = false;
 }
 
-/* Pause system */
 let gamePaused = false;
 let gameLogs = [];
 
 function addLog(msg, who){
   const whoLabel = who==="p1" ? "[P1] " : who==="p2" ? "[P2] " : "";
   gameLogs.push(whoLabel + msg);
-  // Batasi log agar tidak terlalu panjang
   if(gameLogs.length > 50) gameLogs.shift();
 }
 
 function openPauseMenu(){
   if(!S) return;
   gamePaused = true;
-  // Render log ke popup
   const logContent = document.getElementById('logContent');
   logContent.innerHTML = gameLogs.length ? gameLogs.map(l => `<div>${l}</div>`).join('') : '<div>Belum ada aksi.</div>';
   document.getElementById('pauseOverlay').style.display = 'flex';
-  // Hentikan musik jika sedang berjalan? Kita bisa biarkan, tapi pause juga bisa hentikan menu music jika di game.
-  // Lebih baik hentikan efek suara? Tidak perlu.
 }
 
 function closePauseMenu(){
@@ -454,10 +459,8 @@ function closePauseMenu(){
 
 function restartGame(){
   closePauseMenu();
-  // Restart dengan mode yang sama
   const mode = S.mode;
   gameLogs = [];
-  document.getElementById('log').innerHTML = ""; // tidak ada log element
   newGame(mode);
 }
 
@@ -466,7 +469,7 @@ function changeMode(){
   gameLogs = [];
   document.getElementById('gameScreen').style.display = 'none';
   document.getElementById('startScreen').style.display = 'flex';
-  playMenuMusic(); // mainkan musik menu
+  playMenuMusic();
 }
 
 document.getElementById('resumeBtn').onclick = closePauseMenu;
@@ -598,7 +601,7 @@ function showClue() {
 }
 
 function renderBoard(){
-  if(gamePaused) return; // Jangan render saat pause
+  if(gamePaused) return;
   const cells = [...S.board.keys()].map(k=>k.split(",").map(Number));
   const legalSet = new Set();
   if(!S.locked && !S.animating && S.showClue){
@@ -747,7 +750,6 @@ function renderStatus(){
 
 function renderAll(){ renderBoard(); renderHands(); renderStatus(); }
 
-/* Log sekarang disimpan ke gameLogs dan ditampilkan di popup */
 function log(msg, who){
   addLog(msg, who);
 }
@@ -1154,7 +1156,7 @@ document.getElementById("btnStart").onclick = ()=>{
   SoundEffects.click();
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("gameScreen").style.display = "flex";
-  gameLogs = []; // reset log
+  gameLogs = [];
   newGame(currentMode);
 };
 
