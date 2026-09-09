@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="https://www.ztratax.com/favicon.ico" type="image/x-icon">
+  <title>QUADRAN ZTRATAX - Meja Permainan</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>QUADRAN ZTRATAX</h1>
+<div class="subtitle">Meja Permainan 2 Pemain &middot; Top-Down &middot; Drag &amp; Drop</div>
+
+<!-- LAYAR AWAL -->
+<div id="startScreen">
+  <h2>Pilih Mode Permainan</h2>
+  <div class="modeOption">
+    <button class="modeBtn active" id="modePvP">Player vs Player</button>
+    <button class="modeBtn" id="modePvE">Player vs Computer</button>
+  </div>
+  <button class="bigBtn" id="btnStart">Mulai Permainan</button>
+  <div class="rulesBox">
+    <b>Cara main:</b> Klik kartu untuk memilih, lalu tekan R untuk rotasi. Atau drag kartu langsung ke sel papan. Gunakan tombol panah di pojok kanan bawah papan untuk menggeser tampilan jika di-zoom. Tekan 💡 untuk melihat semua kemungkinan langkah, dan tombol ⏸ untuk pause.
+  </div>
+</div>
+
+<!-- LAYAR PERMAINAN -->
+<div id="gameScreen">
+  <div id="table">
+    <div id="opponentArea">
+      <div id="opponentInfo">Player 2 / Komputer</div>
+      <div class="handSection">
+        <div id="handPlayer2"></div>
+        <div class="ctrlBar" id="ctrlPlayer2">
+          <button class="ctrlBtn gray" id="btnRotate2">Rotasi</button>
+          <button class="ctrlBtn primary" id="btnDraw2" disabled>Ambil Kartu</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="boardWrap">
+      <div id="board"></div>
+      <div id="boardControls">
+        <button class="nav-btn" style="grid-area: minus" onclick="zoomOut()">-</button>
+        <button class="nav-btn" style="grid-area: up" onclick="pan(0, 50)">↑</button>
+        <button class="nav-btn" style="grid-area: plus" onclick="zoomIn()">+</button>
+        <button class="nav-btn" style="grid-area: left" onclick="pan(50, 0)">←</button>
+        <button class="nav-btn" style="grid-area: home" onclick="resetView()">🏠</button>
+        <button class="nav-btn" style="grid-area: right" onclick="pan(-50, 0)">→</button>
+        <button class="nav-btn" style="grid-area: clue" onclick="showClue()" title="Tampilkan Petunjuk">💡</button>
+        <button class="nav-btn" style="grid-area: down" onclick="pan(0, -50)">↓</button>
+        <button class="nav-btn" style="grid-area: mute" onclick="openPauseMenu()" title="Pause">⏸</button>
+      </div>
+    </div>
+
+    <div id="player1Area">
+      <div class="handSection">
+        <div id="handPlayer1"></div>
+        <div class="ctrlBar" id="ctrlPlayer1">
+          <button class="ctrlBtn gray" id="btnRotate1">Rotasi</button>
+          <button class="ctrlBtn primary" id="btnDraw1" disabled>Ambil Kartu</button>
+        </div>
+      </div>
+      <div id="drawPileContainer">
+        <div id="drawPile" class="draw-pile">
+          <img src="ztrataxback.png" alt="Tumpukan Kartu" onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend', '<div style=\'width:50px;height:50px;background:#ccc;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:10px;\'>Back</div>');">
+          <span id="drawPileCount">0 kartu yang tersisa</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP PAUSE -->
+<div id="pauseOverlay">
+  <div class="box">
+    <h2>⏸ Pause</h2>
+    <div class="logArea" id="logContent"></div>
+    <div class="buttons">
+      <button id="resumeBtn">Lanjutkan</button>
+      <button id="restartBtn">Ulang Permainan</button>
+      <button id="changeModeBtn">Ganti Mode</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY HASIL -->
+<div id="overlay">
+  <div class="box">
+    <h2 id="ovTitle"></h2>
+    <div id="ovBody"></div>
+    <br>
+    <button class="bigBtn" id="btnAgain">Main Lagi</button>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
