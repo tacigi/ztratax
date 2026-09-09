@@ -123,6 +123,15 @@ h1{font-size:24px; letter-spacing:3px; color:#fff; text-align:center; margin-top
 #resumeBtn{background:var(--accent); color:#fff;}
 #restartBtn{background:var(--ok); color:#fff;}
 #changeModeBtn{background:#e0e0e0; color:#333;}
+#statsBtn{background:#FFC107; color:#333;}
+
+/* MODAL STATISTIK */
+#statsOverlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:70; align-items:center; justify-content:center;}
+#statsOverlay > div{background:#fff; padding:20px; border-radius:10px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; position:relative;}
+#statsOverlay table{width:100%; border-collapse:collapse; margin:10px 0;}
+#statsOverlay th, #statsOverlay td{border:1px solid #ccc; padding:8px; text-align:center;}
+#statsOverlay h4{ margin-top:20px; }
+#closeStatsBtn{position:absolute; top:10px; right:10px; background:#eee; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;}
 
 body.interaction-locked #board, body.interaction-locked #handPlayer1, body.interaction-locked #handPlayer2, body.interaction-locked .draw-pile, body.interaction-locked #boardControls{ pointer-events:none; }
 
@@ -173,12 +182,3 @@ body, #gameScreen, #table, #boardWrap, #handPlayer1, #handPlayer2, #startScreen,
   h1 { font-size: 20px; margin-top: 2px; } .subtitle { font-size: 11px; margin-bottom: 5px; }
   #table { padding: 8px; border-width: 4px; } #boardWrap { padding: 8px; }
 }
-
-
-#statsOverlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:70; align-items:center; justify-content:center; }
-#statsOverlay > div{ background:#fff; padding:20px; border-radius:10px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; position:relative; }
-#statsOverlay table{ width:100%; border-collapse:collapse; margin:10px 0; }
-#statsOverlay th, #statsOverlay td{ border:1px solid #ccc; padding:8px; text-align:center; }
-#statsOverlay h4{ margin-top:20px; }
-#closeStatsBtn{ position:absolute; top:10px; right:10px; background:#eee; border:none; padding:5px 10px; cursor:pointer; border-radius:5px; }
-
