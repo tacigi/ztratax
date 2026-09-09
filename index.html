@@ -17,47 +17,52 @@
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   body{
     font-family:'Segoe UI', Arial, sans-serif; background:var(--bg); color:var(--text);
-    height:100vh;
+    height:100vh; /* fallback */
+    height:100dvh; /* yang benar untuk mobile */
     overflow:hidden;
     display:flex;
     flex-direction:column;
     align-items:center;
-    padding:6px;
+    padding:8px;
   }
-  h1{font-size:22px; letter-spacing:2px; color:#fff; text-align:center; margin-top:2px; text-shadow:2px 2px 4px rgba(0,0,0,.5); flex-shrink:0;}
-  .subtitle{font-size:11px; color:#ccc; font-weight:600; text-align:center; margin-bottom:4px; flex-shrink:0;}
+  h1{font-size:24px; letter-spacing:3px; color:#fff; text-align:center; margin-top:2px; text-shadow:2px 2px 4px rgba(0,0,0,.5); flex-shrink:0;}
+  .subtitle{font-size:12px; color:#ccc; font-weight:600; text-align:center; margin-bottom:8px; flex-shrink:0;}
 
-  #startScreen{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:5vh;
-    background:var(--panel); padding:20px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3); max-width:450px; width:100%;
+  #startScreen{display:flex; flex-direction:column; align-items:center; gap:18px; margin-top:5vh;
+    background:var(--panel); padding:30px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3); max-width:450px; width:100%;
     overflow-y:auto;
   }
-  #startScreen h2{font-size:18px; margin-bottom:5px;}
-  .modeOption{ display:flex; justify-content:center; gap:10px; margin-bottom:10px; }
+  #startScreen h2{font-size:18px; margin-bottom:10px;}
+  .modeOption{ display:flex; justify-content:center; gap:12px; margin-bottom:20px; }
   .modeBtn{
-    padding:8px 14px; border:2px solid var(--border); border-radius:8px; background:#f8f9fa;
-    font-weight:700; cursor:pointer; font-size:14px; transition:all .2s;
+    padding:12px 20px; border:2px solid var(--border); border-radius:10px; background:#f8f9fa;
+    font-weight:700; cursor:pointer; font-size:15px; transition:all .2s;
   }
   .modeBtn.active{border-color:var(--accent); background:#e8f0fe; color:var(--accent); box-shadow:0 2px 6px rgba(31,111,235,.2);}
-  .bigBtn{padding:10px 24px; background:var(--accent); color:#fff; border:none; border-radius:30px;
-    font-size:15px; font-weight:700; cursor:pointer; box-shadow:0 6px 12px rgba(0,0,0,.2);}
+  .bigBtn{padding:14px 36px; background:var(--accent); color:#fff; border:none; border-radius:30px;
+    font-size:16px; font-weight:700; cursor:pointer; box-shadow:0 6px 12px rgba(0,0,0,.2);}
   .bigBtn:hover{filter:brightness(1.1);}
-  .rulesBox{font-size:11px; line-height:1.5; background:#fafafa; border:1px dashed var(--border); border-radius:6px; padding:8px; text-align:left;}
+  .rulesBox{font-size:12px; line-height:1.6; background:#fafafa; border:1px dashed var(--border); border-radius:8px; padding:14px; text-align:left;}
   .rulesBox b{color:var(--primary);}
 
-  #gameScreen{display:none; width:100%; max-width:1000px; flex-direction:column; align-items:center; flex:1; min-height:0; overflow:hidden;}
+  #gameScreen{
+    display:none; width:100%; max-width:1100px; flex-direction:column; align-items:center; 
+    flex:1; min-height:0;
+    overflow-y:auto; /* Jaring pengaman jika kepepet */
+  }
 
   #table{
-    width:100%; background:var(--table); border:4px solid var(--table-border); border-radius:14px;
-    padding:6px; box-shadow:inset 0 0 20px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.3);
+    width:100%; background:var(--table); border:6px solid var(--table-border); border-radius:20px;
+    padding:10px; box-shadow:inset 0 0 30px rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.4);
     display:flex; flex-direction:column; flex:1; min-height:0;
-    justify-content:flex-start; /* Perbaikan: jangan space-between */
-    gap:4px;
+    justify-content:flex-start; /* Jangan space-between */
+    gap:5px;
   }
-  #opponentArea{display:flex; flex-direction:column; align-items:center; flex-shrink:0; max-height:22%; overflow:hidden;}
-  #opponentInfo{color:#fff; font-size:12px; margin-bottom:2px; text-shadow:1px 1px 2px black; font-weight:bold;}
+  #opponentArea{display:flex; flex-direction:column; align-items:center; flex-shrink:0; max-height:25%; overflow:visible; margin-bottom:5px;}
+  #opponentInfo{color:#fff; font-size:14px; margin-bottom:5px; text-shadow:1px 1px 2px black; font-weight:bold;}
 
   #boardWrap{
-    width:100%; overflow:hidden; background:rgba(0,0,0,0.2); border-radius:8px; padding:6px;
+    width:100%; overflow:hidden; background:rgba(0,0,0,0.2); border-radius:10px; padding:10px;
     display:flex; justify-content:center; align-items:center;
     flex:1; min-height:0; position: relative;
   }
@@ -78,12 +83,12 @@
     60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  .card.placing{ animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .card.placing{ animation: popIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
   .flying-card{
     position: fixed; z-index: 1000; pointer-events: none;
-    transition: left 0.45s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.45s cubic-bezier(0.25, 0.1, 0.25, 1),
-                transform 0.45s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.45s ease;
+    transition: left 0.55s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
+                transform 0.55s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.55s ease;
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
     border: 2px solid var(--primary); border-radius: 6px; overflow: hidden;
     background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.4);
@@ -95,66 +100,71 @@
     width: var(--hand-card-size); height: var(--hand-card-size);
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
     border: 2px solid var(--accent); border-radius: 6px; overflow: hidden;
-    background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,.45);
+    background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,.45);
     transform: rotate(5deg) scale(1.1); opacity: 0.95; transition: transform 0.2s ease;
   }
 
   #drawPileContainer{
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    margin-left: 4px; flex-shrink:0;
+    margin-left: 10px; flex-shrink:0;
   }
   .draw-pile{
     display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none;
   }
   .draw-pile img{
-    width: var(--card-size); height: var(--card-size); border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,.3);
+    width: var(--card-size); height: var(--card-size); border-radius: 6px; box-shadow: 0 6px 12px rgba(0,0,0,.4);
+    background: #ccc; /* fallback jika gambar gagal dimuat */
   }
   .draw-pile span{
-    color: #fff; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,.8); margin-top: 2px; text-align: center; white-space: nowrap;
+    color: #fff; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,.8); margin-top: 4px; text-align: center; white-space: nowrap;
   }
 
-  #player1Area{display:flex; flex-direction:row; justify-content:center; align-items:center; flex-shrink:0; max-height:30%; overflow:hidden;}
+  #player1Area{
+    display:flex; flex-direction:row; justify-content:center; align-items:flex-start; 
+    flex-shrink:0; overflow:visible; margin-top:10px;
+  }
 
-  .handSection{margin:3px 0;}
-  .handLabel{color:#fff; font-size:12px; font-weight:bold; margin-bottom:2px; text-align:center; text-shadow:1px 1px 2px black;}
-  #handPlayer1{display:flex; flex-wrap:wrap; gap:4px; justify-content:center; overflow:hidden; min-height:var(--hand-card-size);}
-  #handPlayer2{display:flex; flex-wrap:wrap; gap:4px; justify-content:center; overflow:hidden; min-height:var(--hand-card-size);}
+  .handSection{margin:5px 0; display:flex; flex-direction:column; align-items:center;}
+  .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:3px; text-align:center; text-shadow:1px 1px 2px black;}
+  #handPlayer1{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:100%;}
+  #handPlayer2{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:100%;}
 
   .handCard{width:var(--hand-card-size); height:var(--hand-card-size); display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
     border:2px solid var(--primary); border-radius:6px; overflow:hidden; cursor:pointer; background:#fff;
-    box-shadow:0 3px 6px rgba(0,0,0,.25); transition:transform .15s ease, box-shadow .15s ease;}
-  .handCard:hover{transform:translateY(-2px); box-shadow:0 6px 10px rgba(0,0,0,.3);}
-  .handCard.selected{outline:3px solid var(--accent); transform:translateY(-4px) scale(1.05);}
-  .handCard.rotate-pulse{ animation: rotatePulse .2s ease; }
-  @keyframes rotatePulse{ 0%{transform:scale(1) rotate(0deg);} 50%{transform:scale(1.05) rotate(10deg);} 100%{transform:scale(1) rotate(0deg);} }
+    box-shadow:0 4px 8px rgba(0,0,0,.25); transition:transform .2s ease, box-shadow .2s ease;}
+  .handCard:hover{transform:translateY(-4px); box-shadow:0 8px 14px rgba(0,0,0,.3);}
+  .handCard.selected{outline:3px solid var(--accent); transform:translateY(-8px) scale(1.08);}
+  .handCard.rotate-pulse{ animation: rotatePulse .25s ease; }
+  @keyframes rotatePulse{ 0%{transform:scale(1) rotate(0deg);} 50%{transform:scale(1.1) rotate(15deg);} 100%{transform:scale(1) rotate(0deg);} }
 
-  .ctrlBar{display:flex; gap:5px; justify-content:center; margin-top:3px;}
-  .ctrlBtn{padding:4px 10px; border:none; border-radius:15px; font-weight:700; font-size:12px; cursor:pointer; transition:filter .2s;}
+  .ctrlBar{display:flex; gap:8px; justify-content:center; margin-top:5px;}
+
+  .ctrlBtn{padding:6px 12px; border:none; border-radius:20px; font-weight:700; font-size:13px; cursor:pointer; transition:filter .2s;}
   .ctrlBtn.primary{background:var(--accent); color:#fff;}
   .ctrlBtn.gray{background:#e0e0e0; color:#333;}
   .ctrlBtn:disabled{opacity:.4; cursor:not-allowed;}
   .ctrlBtn.primary:disabled{opacity:.4;}
 
   #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:50; align-items:center; justify-content:center;}
-  #overlay .box{background:#fff; border-radius:10px; padding:20px 30px; text-align:center; max-width:90%;}
-  #overlay h2{font-size:20px; margin-bottom:8px;}
-  #overlay p{font-size:13px; margin-bottom:5px;}
+  #overlay .box{background:#fff; border-radius:14px; padding:30px 40px; text-align:center; max-width:90%;}
+  #overlay h2{font-size:22px; margin-bottom:10px;}
+  #overlay p{font-size:14px; margin-bottom:6px;}
 
   #pauseOverlay{
     display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:60;
     align-items:center; justify-content:center;
   }
   #pauseOverlay .box{
-    background:#fff; border-radius:10px; padding:20px; text-align:center; max-width:360px; width:90%;
+    background:#fff; border-radius:14px; padding:25px 30px; text-align:center; max-width:400px; width:90%;
     max-height:80vh; overflow-y:auto;
   }
-  #pauseOverlay h2{font-size:22px; margin-bottom:10px;}
+  #pauseOverlay h2{font-size:24px; margin-bottom:15px;}
   #pauseOverlay .logArea{
-    background:#f0f0f0; border-radius:6px; padding:8px; margin:8px 0; max-height:150px; overflow-y:auto;
-    text-align:left; font-size:11px; line-height:1.4;
+    background:#f0f0f0; border-radius:8px; padding:10px; margin:10px 0; max-height:200px; overflow-y:auto;
+    text-align:left; font-size:12px; line-height:1.5;
   }
-  #pauseOverlay .buttons{display:flex; flex-direction:column; gap:8px; margin-top:8px;}
-  #pauseOverlay .buttons button{padding:10px; font-size:14px; border:none; border-radius:6px; cursor:pointer;}
+  #pauseOverlay .buttons{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
+  #pauseOverlay .buttons button{padding:12px; font-size:15px; border:none; border-radius:8px; cursor:pointer;}
   #resumeBtn{background:var(--accent); color:#fff;}
   #restartBtn{background:var(--ok); color:#fff;}
   #changeModeBtn{background:#e0e0e0; color:#333;}
@@ -167,15 +177,15 @@
   body.interaction-dragging #boardWrap { overflow: hidden; }
 
   #boardControls{
-    position: absolute; bottom: 6px; right: 6px; display: grid;
+    position: absolute; bottom: 10px; right: 10px; display: grid;
     grid-template-columns: repeat(3, var(--nav-btn-size)); grid-template-rows: repeat(3, var(--nav-btn-size));
     grid-template-areas: "minus up plus" "left home right" "clue down mute";
-    gap: 2px; background: rgba(0,0,0,0.6); padding: 4px; border-radius: 6px; z-index: 10;
+    gap: 4px; background: rgba(0,0,0,0.6); padding: 6px; border-radius: 8px; z-index: 10;
   }
   .nav-btn{
-    width: var(--nav-btn-size); height: var(--nav-btn-size); background: #fff; border: none; border-radius: 3px;
-    cursor: pointer; font-size: 14px; font-weight: bold; color: #333; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 1px 2px rgba(0,0,0,.2); padding: 0; margin: 0;
+    width: var(--nav-btn-size); height: var(--nav-btn-size); background: #fff; border: none; border-radius: 4px;
+    cursor: pointer; font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2); padding: 0; margin: 0;
   }
   .nav-btn:hover{ background: #e0e0e0; } .nav-btn:active{ background: #ccc; }
 
@@ -183,45 +193,60 @@
     touch-action: manipulation !important; -webkit-user-select: none; user-select: none;
   }
 
-  /* Media query untuk layar kecil */
   @media (max-width: 768px) {
-    :root { --card-size: 50px; --hand-card-size: 44px; --nav-btn-size: 26px; }
-    body { padding: 4px; }
-    h1 { font-size: 18px; margin-top: 1px; }
-    .subtitle { font-size: 10px; margin-bottom: 3px; }
-    #table { padding: 4px; border-width: 3px; }
-    #boardWrap { padding: 4px; }
+    :root { --card-size: 56px; --hand-card-size: 50px; --nav-btn-size: 30px; }
+    body { padding: 6px; }
+    h1 { font-size: 20px; letter-spacing: 2px; } .subtitle { font-size: 11px; }
+    #table { padding: 8px; border-width: 4px; border-radius: 14px; }
+    #boardWrap { padding: 8px; }
     .draw-pile img { width: var(--card-size); height: var(--card-size); }
-    .draw-pile span { font-size: 8px; }
-    #drawPileContainer { margin-left: 2px; }
-    #opponentArea, #player1Area { max-height: 20%; }
-    .handLabel { font-size: 10px; }
-    .ctrlBtn { padding: 3px 8px; font-size: 10px; }
+    .draw-pile span { font-size: 10px; }
+    #drawPileContainer { margin-left: 5px; }
+    #startScreen { padding: 25px; } .modeBtn { padding: 10px 16px; font-size: 14px; }
+    .bigBtn { padding: 12px 28px; font-size: 14px; } .rulesBox { font-size: 11px; }
+    
+    /* Ubah tata letak P1 menjadi kolom */
+    #player1Area {
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    #drawPileContainer {
+      margin-left: 0;
+      flex-direction: row;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    .draw-pile {
+      flex-direction: row;
+      gap: 6px;
+    }
   }
+
   @media (max-width: 480px) {
-    :root { --card-size: 44px; --hand-card-size: 40px; --nav-btn-size: 22px; }
-    body { padding: 3px; }
-    h1 { font-size: 16px; }
-    .subtitle { font-size: 9px; }
-    #table { padding: 3px; }
-    #boardWrap { padding: 3px; }
-    .draw-pile img { width: var(--card-size); height: var(--card-size); }
-    .draw-pile span { font-size: 7px; }
-    #drawPileContainer { margin-left: 1px; }
-    #opponentArea, #player1Area { max-height: 18%; }
-    .handLabel { font-size: 9px; }
-    .ctrlBtn { padding: 2px 6px; font-size: 9px; }
-  }
-  /* Tablet portrait */
-  @media (orientation: portrait) and (max-width: 1024px) {
-    :root { --card-size: 52px; --hand-card-size: 46px; --nav-btn-size: 28px; }
+    :root { --card-size: 48px; --hand-card-size: 44px; --nav-btn-size: 26px; }
     body { padding: 5px; }
-    #table { padding: 5px; border-width: 3px; }
-    #boardWrap { padding: 5px; }
+    h1 { font-size: 18px; }
+    .subtitle { font-size: 10px; }
+    #table { padding: 6px; border-width: 3px; border-radius: 12px; }
+    #boardWrap { padding: 6px; }
     .draw-pile img { width: var(--card-size); height: var(--card-size); }
     .draw-pile span { font-size: 9px; }
-    #drawPileContainer { margin-left: 3px; }
-    #opponentArea, #player1Area { max-height: 22%; }
+    #drawPileContainer { margin-left: 0; }
+    #startScreen { padding: 20px; }
+    .modeBtn { padding: 8px 12px; font-size: 13px; }
+    .bigBtn { padding: 10px 22px; font-size: 13px; }
+    .rulesBox { font-size: 10px; padding: 10px; }
+    .ctrlBtn { padding: 6px 10px; font-size: 12px; }
+  }
+
+  @media (max-height: 800px) {
+    :root { --card-size: 56px; --hand-card-size: 50px; --nav-btn-size: 30px; }
+    h1 { font-size: 20px; margin-top: 2px; }
+    .subtitle { font-size: 11px; margin-bottom: 5px; }
+    #table { padding: 8px; border-width: 4px; }
+    #boardWrap { padding: 8px; }
   }
 </style>
 </head>
@@ -280,7 +305,7 @@
       </div>
       <div id="drawPileContainer">
         <div id="drawPile" class="draw-pile">
-          <img src="ztrataxback.png" alt="Tumpukan Kartu">
+          <img src="ztrataxback.png" alt="Tumpukan Kartu" onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend', '<div style=\'width:50px;height:50px;background:#ccc;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:10px;\'>Back</div>');">
           <span id="drawPileCount">0 kartu yang tersisa</span>
         </div>
       </div>
@@ -646,8 +671,8 @@ function renderBoard(){
 
 function fitBoard(){
   const wrap = document.getElementById("boardWrap");
-  const wrapWidth = wrap.clientWidth - 20;
-  const wrapHeight = wrap.clientHeight - 20;
+  const wrapWidth = wrap.clientWidth - 30;
+  const wrapHeight = wrap.clientHeight - 30;
   const boardWidth = boardEl.offsetWidth;
   const boardHeight = boardEl.offsetHeight;
   
@@ -782,7 +807,7 @@ function animateMoveCard(fromElement, toElement, cardQ, callback){
     setTimeout(() => { fly.style.transform = 'scale(1) rotate(0deg)'; }, 250);
   });
 
-  setTimeout(() => { fly.remove(); callback(); }, 450);
+  setTimeout(() => { fly.remove(); callback(); }, 550);
 }
 
 function animateDrawToHand(playerIndex, callback){
@@ -817,7 +842,7 @@ function animateDrawToHand(playerIndex, callback){
     S.hands[playerIndex].push(card);
     S.handRotations[playerIndex].push(0);
     callback();
-  }, 450);
+  }, 550);
 }
 
 function attachDrag(el, pid, cardIndex){
@@ -921,7 +946,7 @@ function attachDrag(el, pid, cardIndex){
           fly.remove();
           S.selected = -1;
           renderAll();
-        }, 450);
+        }, 550);
         log("Kartu tidak valid, kembali ke tangan.", pid===0?"p1":"p2");
       }
     } else {
@@ -999,7 +1024,7 @@ function handleRotate(pid){
   const selectedEl = handEl.querySelector(".handCard.selected");
   if(selectedEl){
     selectedEl.classList.add("rotate-pulse");
-    setTimeout(()=> selectedEl && selectedEl.classList.remove("rotate-pulse"), 200);
+    setTimeout(()=> selectedEl && selectedEl.classList.remove("rotate-pulse"), 250);
   }
 }
 
