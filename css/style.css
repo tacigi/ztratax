@@ -173,3 +173,12 @@ body, #gameScreen, #table, #boardWrap, #handPlayer1, #handPlayer2, #startScreen,
   h1 { font-size: 20px; margin-top: 2px; } .subtitle { font-size: 11px; margin-bottom: 5px; }
   #table { padding: 8px; border-width: 4px; } #boardWrap { padding: 8px; }
 }
+
+
+#statsOverlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:70; align-items:center; justify-content:center; }
+#statsOverlay > div{ background:#fff; padding:20px; border-radius:10px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; position:relative; }
+#statsOverlay table{ width:100%; border-collapse:collapse; margin:10px 0; }
+#statsOverlay th, #statsOverlay td{ border:1px solid #ccc; padding:8px; text-align:center; }
+#statsOverlay h4{ margin-top:20px; }
+#closeStatsBtn{ position:absolute; top:10px; right:10px; background:#eee; border:none; padding:5px 10px; cursor:pointer; border-radius:5px; }
+
