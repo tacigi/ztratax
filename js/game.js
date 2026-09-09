@@ -32,12 +32,12 @@ function saveStats(stats) {
 function defaultStats() {
   return {
     pvp: {
-      p1: { playCount:0, winCount:0, totalScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0 },
-      p2: { playCount:0, winCount:0, totalScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0 }
+      p1: { playCount:0, winCount:0, totalScore:0, highScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0, fastestTime: Infinity, totalTime:0 },
+      p2: { playCount:0, winCount:0, totalScore:0, highScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0, fastestTime: Infinity, totalTime:0 }
     },
     pve: {
-      player: { playCount:0, winCount:0, totalScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0 },
-      computer: { playCount:0, winCount:0, totalScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0 }
+      player: { playCount:0, winCount:0, totalScore:0, highScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0, fastestTime: Infinity, totalTime:0 },
+      computer: { playCount:0, winCount:0, totalScore:0, highScore:0, totalCardsPlayedValue:0, totalCardsRemainingValue:0, fastestTime: Infinity, totalTime:0 }
     },
     history: []
   };
@@ -54,17 +54,28 @@ function updateStats(mode, winnerIndex, scoreP1, scoreP2, playedValueP1, playedV
   } else {
     p1Key = 'player'; p2Key = 'computer';
   }
-  stats[key][p1Key].playCount++;
-  stats[key][p2Key].playCount++;
-  if (winnerIndex === 0) stats[key][p1Key].winCount++;
-  else stats[key][p2Key].winCount++;
-  stats[key][p1Key].totalScore += scoreP1;
-  stats[key][p2Key].totalScore += scoreP2;
-  stats[key][p1Key].totalCardsPlayedValue += playedValueP1;
-  stats[key][p2Key].totalCardsPlayedValue += playedValueP2;
-  stats[key][p1Key].totalCardsRemainingValue += remainingValueP1;
-  stats[key][p2Key].totalCardsRemainingValue += remainingValueP2;
 
+  // Update P1
+  stats[key][p1Key].playCount++;
+  if (winnerIndex === 0) stats[key][p1Key].winCount++;
+  stats[key][p1Key].totalScore += scoreP1;
+  if (scoreP1 > stats[key][p1Key].highScore) stats[key][p1Key].highScore = scoreP1;
+  stats[key][p1Key].totalCardsPlayedValue += playedValueP1;
+  stats[key][p1Key].totalCardsRemainingValue += remainingValueP1;
+  stats[key][p1Key].totalTime += duration;
+  if (duration < stats[key][p1Key].fastestTime) stats[key][p1Key].fastestTime = duration;
+
+  // Update P2
+  stats[key][p2Key].playCount++;
+  if (winnerIndex === 1) stats[key][p2Key].winCount++;
+  stats[key][p2Key].totalScore += scoreP2;
+  if (scoreP2 > stats[key][p2Key].highScore) stats[key][p2Key].highScore = scoreP2;
+  stats[key][p2Key].totalCardsPlayedValue += playedValueP2;
+  stats[key][p2Key].totalCardsRemainingValue += remainingValueP2;
+  stats[key][p2Key].totalTime += duration;
+  if (duration < stats[key][p2Key].fastestTime) stats[key][p2Key].fastestTime = duration;
+
+  // Riwayat
   const historyEntry = {
     timestamp: new Date().toISOString(),
     mode: mode,
@@ -132,7 +143,7 @@ let currentDraws = { p1:0, p2:0 };
 let currentPlayedValue = { p1:0, p2:0 };
 let gameStartTime = 0;
 let gameDuration = 0;
-let timerInterval = null; // <-- TAMBAHAN UNTUK TIMER
+let timerInterval = null;
 
 /* ================= LOG ================= */
 function addLog(msg, who){
@@ -160,12 +171,12 @@ function restartGame(){
   closePauseMenu();
   const mode = S.mode;
   gameLogs = [];
-  clearInterval(timerInterval); // <-- Tambahan
+  clearInterval(timerInterval);
   newGame(mode);
 }
 function changeMode(){
   closePauseMenu();
-  clearInterval(timerInterval); // <-- Tambahan
+  clearInterval(timerInterval);
   gameLogs = [];
   document.getElementById('gameScreen').style.display = 'none';
   document.getElementById('startScreen').style.display = 'flex';
@@ -184,7 +195,18 @@ function openStatsModal(){
     p1Name = "Player"; p2Name = "Computer";
     p1Stats = stats.pve.player; p2Stats = stats.pve.computer;
   }
+
   const winRate = (st) => st.playCount > 0 ? (st.winCount / st.playCount * 100).toFixed(1) : '0';
+  const avgTime = (st) => st.playCount > 0 ? Math.floor(st.totalTime / st.playCount) : 0;
+
+  // Format waktu
+  const formatTime = (seconds) => {
+    if (seconds === Infinity || !seconds) return '—';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  };
+
   const html = `
     <h3>Statistik ${mode === 'pvp' ? 'PvP' : 'PvE'}</h3>
     <table>
@@ -193,12 +215,15 @@ function openStatsModal(){
       <tr><td>Win Count</td><td>${p1Stats.winCount}</td><td>${p2Stats.winCount}</td></tr>
       <tr><td>Win Rate</td><td>${winRate(p1Stats)}%</td><td>${winRate(p2Stats)}%</td></tr>
       <tr><td>Total Skor</td><td>${p1Stats.totalScore}</td><td>${p2Stats.totalScore}</td></tr>
+      <tr><td>Skor Tertinggi</td><td>${p1Stats.highScore}</td><td>${p2Stats.highScore}</td></tr>
       <tr><td>Nilai Kartu Dimainkan</td><td>${p1Stats.totalCardsPlayedValue}</td><td>${p2Stats.totalCardsPlayedValue}</td></tr>
       <tr><td>Nilai Kartu Sisa</td><td>${p1Stats.totalCardsRemainingValue}</td><td>${p2Stats.totalCardsRemainingValue}</td></tr>
+      <tr><td>Waktu Tercepat</td><td>${formatTime(p1Stats.fastestTime)}</td><td>${formatTime(p2Stats.fastestTime)}</td></tr>
+      <tr><td>Rata-rata Waktu</td><td>${formatTime(avgTime(p1Stats))}</td><td>${formatTime(avgTime(p2Stats))}</td></tr>
     </table>
     <h4>Riwayat (5 terakhir)</h4>
     <ul>
-      ${stats.history.slice(0,5).map(h=>`<li>${new Date(h.timestamp).toLocaleString()} - ${h.mode} - Winner: ${h.winner===0?'P1':'P2'}</li>`).join('') || 'Belum ada riwayat'}
+      ${stats.history.slice(0,5).map(h=>`<li>${new Date(h.timestamp).toLocaleString()} - ${h.mode} - Winner: ${h.winner===0?'P1':'P2'} - Durasi: ${formatTime(h.duration)}</li>`).join('') || 'Belum ada riwayat'}
     </ul>
   `;
   document.getElementById('statsContent').innerHTML = html;
@@ -749,7 +774,7 @@ function endTurn(pi){
   renderAll();
   if(S.hands[pi].length === 0){
     gameDuration = Date.now() - gameStartTime;
-    clearInterval(timerInterval); // <-- Hentikan timer
+    clearInterval(timerInterval);
 
     const winnerIndex = pi;
     const loserIndex = 1 - pi;
@@ -782,7 +807,7 @@ function endTurn(pi){
     for(let i=0;i<2;i++) if(legalMoves(S.hands[i]).length > 0){ anyMove = true; break; }
     if(!anyMove){
       gameDuration = Date.now() - gameStartTime;
-      clearInterval(timerInterval); // <-- Hentikan timer
+      clearInterval(timerInterval);
 
       const totals = S.hands.map(h => h.reduce((s,c)=> s + cardValue(c), 0));
       const min = Math.min(...totals);
@@ -880,7 +905,6 @@ document.getElementById('resumeBtn').onclick = closePauseMenu;
 document.getElementById('restartBtn').onclick = restartGame;
 document.getElementById('changeModeBtn').onclick = changeMode;
 
-// Pengecekan null untuk menghindari error jika elemen tidak ada
 if(document.getElementById('statsBtn')) document.getElementById('statsBtn').onclick = openStatsModal;
 if(document.getElementById('closeStatsBtn')) document.getElementById('closeStatsBtn').onclick = closeStatsModal;
 
@@ -934,7 +958,7 @@ document.getElementById("btnDraw2").onclick = ()=>{
 
 document.getElementById("btnAgain").onclick = ()=>{
   SoundEffects.click();
-  clearInterval(timerInterval); // <-- Hentikan timer saat kembali ke menu
+  clearInterval(timerInterval);
   document.getElementById("overlay").style.display = "none";
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("startScreen").style.display = "flex";
