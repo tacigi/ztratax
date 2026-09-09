@@ -30,40 +30,35 @@
     background:var(--panel); padding:30px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3); max-width:450px; width:100%;
     overflow-y:auto;
   }
-
-  #gameScreen{
-    display:none;
-    width:100%;
-    max-width:1100px;
-    flex-direction:column;
-    align-items:center;
-    flex:1;
-    min-height:0;
-    overflow:hidden;
+  #startScreen h2{font-size:18px; margin-bottom:10px;}
+  .modeOption{ display:flex; justify-content:center; gap:12px; margin-bottom:20px; }
+  .modeBtn{
+    padding:12px 20px; border:2px solid var(--border); border-radius:10px; background:#f8f9fa;
+    font-weight:700; cursor:pointer; font-size:15px; transition:all .2s;
   }
+  .modeBtn.active{border-color:var(--accent); background:#e8f0fe; color:var(--accent); box-shadow:0 2px 6px rgba(31,111,235,.2);}
+  .bigBtn{padding:14px 36px; background:var(--accent); color:#fff; border:none; border-radius:30px;
+    font-size:16px; font-weight:700; cursor:pointer; box-shadow:0 6px 12px rgba(0,0,0,.2);}
+  .bigBtn:hover{filter:brightness(1.1);}
+  .rulesBox{font-size:12px; line-height:1.6; background:#fafafa; border:1px dashed var(--border); border-radius:8px; padding:14px; text-align:left;}
+  .rulesBox b{color:var(--primary);}
+
+  #gameScreen{display:none; width:100%; max-width:1100px; flex-direction:column; align-items:center; flex:1; min-height:0; overflow:hidden;}
 
   #table{
     width:100%; background:var(--table); border:6px solid var(--table-border); border-radius:20px;
-    padding:8px; box-shadow:inset 0 0 30px rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.4);
-    display:flex;
-    flex-direction:column;
-    flex:1;
-    min-height:0;
-    overflow:hidden;
+    padding:10px; box-shadow:inset 0 0 30px rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.4);
+    display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden;
   }
-
-  #opponentArea{display:flex; flex-direction:column; align-items:center; margin-bottom:2px; flex-shrink:0;}
-  #opponentInfo{color:#fff; font-size:14px; margin-bottom:2px; text-shadow:1px 1px 2px black; font-weight:bold;}
+  #opponentArea{display:flex; flex-direction:column; align-items:center; margin-bottom:5px; flex-shrink:0;}
+  #opponentInfo{color:#fff; font-size:14px; margin-bottom:5px; text-shadow:1px 1px 2px black; font-weight:bold;}
 
   #boardWrap{
-    width:100%; overflow:hidden; background:rgba(0,0,0,0.2); border-radius:8px; padding:6px;
+    width:100%; overflow:hidden; background:rgba(0,0,0,0.2); border-radius:10px; padding:10px;
     display:flex; justify-content:center; align-items:center;
-    flex:1;
-    min-height:0;
-    position:relative;
+    flex:1; min-height:0; position: relative;
   }
-
-  #board{position:relative; transform-origin:center center;}
+  #board{position:relative; transform-origin: center center;}
 
   .cellEmpty{position:absolute; width:var(--card-size); height:var(--card-size); border:1px dashed rgba(255,255,255,.6); border-radius:6px;}
   .cellEmpty.legal{cursor:pointer; background:rgba(31,111,235,.5); border:2px solid var(--accent); animation:pulse 1s infinite;}
@@ -102,7 +97,7 @@
   }
 
   #drawPileContainer{
-    display: flex; flex-direction: column; align-items: center; justify-content: center; margin-left: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; margin-left: 10px;
   }
   .draw-pile{
     display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none;
@@ -111,15 +106,15 @@
     width: var(--card-size); height: var(--card-size); border-radius: 6px; box-shadow: 0 6px 12px rgba(0,0,0,.4);
   }
   .draw-pile span{
-    color: #fff; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,.8); margin-top: 3px; text-align: center; white-space: nowrap;
+    color: #fff; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,.8); margin-top: 4px; text-align: center; white-space: nowrap;
   }
 
-  #player1Area{display:flex; flex-direction:row; justify-content:center; align-items:center; margin-top:3px; flex-shrink:0;}
+  #player1Area{display:flex; flex-direction:row; justify-content:center; align-items:center; margin-top:5px; flex-shrink:0;}
 
-  .handSection{margin:3px 0;}
-  .handLabel{color:#fff; font-size:13px; font-weight:bold; margin-bottom:2px; text-align:center; text-shadow:1px 1px 2px black;}
-  #handPlayer1{display:flex; flex-wrap:wrap; gap:5px; justify-content:center; min-height:var(--hand-card-size);}
-  #handPlayer2{display:flex; flex-wrap:wrap; gap:5px; justify-content:center; min-height:var(--hand-card-size);}
+  .handSection{margin:5px 0;}
+  .handLabel{color:#fff; font-size:14px; font-weight:bold; margin-bottom:3px; text-align:center; text-shadow:1px 1px 2px black;}
+  #handPlayer1{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; min-height:var(--hand-card-size);}
+  #handPlayer2{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; min-height:var(--hand-card-size);}
 
   .handCard{width:var(--hand-card-size); height:var(--hand-card-size); display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
     border:2px solid var(--primary); border-radius:6px; overflow:hidden; cursor:pointer; background:#fff;
@@ -129,29 +124,39 @@
   .handCard.rotate-pulse{ animation: rotatePulse .25s ease; }
   @keyframes rotatePulse{ 0%{transform:scale(1) rotate(0deg);} 50%{transform:scale(1.1) rotate(15deg);} 100%{transform:scale(1) rotate(0deg);} }
 
-  .ctrlBar{display:flex; gap:6px; justify-content:center; margin-top:3px;}
-  .ctrlBtn{padding:5px 10px; border:none; border-radius:20px; font-weight:700; font-size:12px; cursor:pointer; transition:filter .2s;}
+  .ctrlBar{display:flex; gap:8px; justify-content:center; margin-top:5px;}
+  .ctrlBtn{padding:6px 12px; border:none; border-radius:20px; font-weight:700; font-size:13px; cursor:pointer; transition:filter .2s;}
   .ctrlBtn.primary{background:var(--accent); color:#fff;}
   .ctrlBtn.gray{background:#e0e0e0; color:#333;}
   .ctrlBtn:disabled{opacity:.4; cursor:not-allowed;}
   .ctrlBtn.primary:disabled{opacity:.4;}
 
-  /* Log dan Restart di luar #table, selalu terlihat */
-  #log{
-    width:100%; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:6px 10px;
-    font-size:11px; line-height:1.5; margin-top:4px;
-    flex-shrink:0;
-    height:60px; /* Tinggi tetap */
-    overflow-y:auto;
-  }
-  #log p b.kamu{color:var(--accent);} #log p b.ai{color:var(--danger);}
-
-  #restartBar{display:flex; justify-content:center; margin-top:4px; flex-shrink:0;}
+  /* Hapus log dan restartBar */
 
   #overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:50; align-items:center; justify-content:center;}
   #overlay .box{background:#fff; border-radius:14px; padding:30px 40px; text-align:center; max-width:90%;}
   #overlay h2{font-size:22px; margin-bottom:10px;}
   #overlay p{font-size:14px; margin-bottom:6px;}
+
+  /* Popup Pause */
+  #pauseOverlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:60;
+    align-items:center; justify-content:center;
+  }
+  #pauseOverlay .box{
+    background:#fff; border-radius:14px; padding:25px 30px; text-align:center; max-width:400px; width:90%;
+    max-height:80vh; overflow-y:auto;
+  }
+  #pauseOverlay h2{font-size:24px; margin-bottom:15px;}
+  #pauseOverlay .logArea{
+    background:#f0f0f0; border-radius:8px; padding:10px; margin:10px 0; max-height:200px; overflow-y:auto;
+    text-align:left; font-size:12px; line-height:1.5;
+  }
+  #pauseOverlay .buttons{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
+  #pauseOverlay .buttons button{padding:12px; font-size:15px; border:none; border-radius:8px; cursor:pointer;}
+  #resumeBtn{background:var(--accent); color:#fff;}
+  #restartBtn{background:var(--ok); color:#fff;}
+  #changeModeBtn{background:#e0e0e0; color:#333;}
 
   body.interaction-locked #board, body.interaction-locked #handPlayer1, body.interaction-locked #handPlayer2, body.interaction-locked .draw-pile, body.interaction-locked #boardControls{ pointer-events:none; }
 
@@ -161,61 +166,44 @@
   body.interaction-dragging #boardWrap { overflow: hidden; }
 
   #boardControls{
-    position: absolute; bottom: 8px; right: 8px; display: grid;
+    position: absolute; bottom: 10px; right: 10px; display: grid;
     grid-template-columns: repeat(3, var(--nav-btn-size)); grid-template-rows: repeat(3, var(--nav-btn-size));
     grid-template-areas: "minus up plus" "left home right" "clue down mute";
-    gap: 3px; background: rgba(0,0,0,0.6); padding: 5px; border-radius: 8px; z-index: 10;
+    gap: 4px; background: rgba(0,0,0,0.6); padding: 6px; border-radius: 8px; z-index: 10;
   }
   .nav-btn{
     width: var(--nav-btn-size); height: var(--nav-btn-size); background: #fff; border: none; border-radius: 4px;
-    cursor: pointer; font-size: 14px; font-weight: bold; color: #333; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; justify-content: center;
     box-shadow: 0 2px 4px rgba(0,0,0,.2); padding: 0; margin: 0;
   }
   .nav-btn:hover{ background: #e0e0e0; } .nav-btn:active{ background: #ccc; }
 
   /* CEgah Double-Tap Zoom di Ponsel/Tablet */
-  body, #gameScreen, #table, #boardWrap, #handPlayer1, #handPlayer2, #startScreen, #log, #restartBar, .ctrlBtn, .nav-btn, .bigBtn, .modeBtn {
+  body, #gameScreen, #table, #boardWrap, #handPlayer1, #handPlayer2, #startScreen, .ctrlBtn, .nav-btn, .bigBtn, .modeBtn {
     touch-action: manipulation !important; -webkit-user-select: none; user-select: none;
   }
 
-  /* ===== RESPONSIVE ===== */
   @media (max-width: 768px) {
-    :root { --card-size: 54px; --hand-card-size: 48px; --nav-btn-size: 28px; }
+    :root { --card-size: 56px; --hand-card-size: 50px; --nav-btn-size: 30px; }
     body { padding: 8px; } h1 { font-size: 20px; letter-spacing: 2px; } .subtitle { font-size: 11px; }
-    #table { padding: 6px; border-width: 4px; border-radius: 14px; } #boardWrap { padding: 6px; }
-    .draw-pile span { font-size: 10px; }
-    #log { height: 50px; font-size: 10px; }
-    .ctrlBtn { font-size: 11px; }
+    #table { padding: 8px; border-width: 4px; border-radius: 14px; } #boardWrap { padding: 8px; }
+    .draw-pile img { width: var(--card-size); height: var(--card-size); } .draw-pile span { font-size: 10px; }
+    #drawPileContainer { margin-left: 5px; } #startScreen { padding: 25px; } .modeBtn { padding: 10px 16px; font-size: 14px; }
+    .bigBtn { padding: 12px 28px; font-size: 14px; } .rulesBox { font-size: 11px; }
   }
-
   @media (max-width: 480px) {
-    :root { --card-size: 46px; --hand-card-size: 42px; --nav-btn-size: 24px; }
+    :root { --card-size: 48px; --hand-card-size: 44px; --nav-btn-size: 26px; }
     body { padding: 6px; } h1 { font-size: 18px; } .subtitle { font-size: 10px; }
-    #table { padding: 4px; border-width: 3px; border-radius: 10px; } #boardWrap { padding: 4px; }
-    .draw-pile span { font-size: 9px; }
-    #log { height: 45px; font-size: 10px; }
-    .ctrlBtn { font-size: 10px; }
+    #table { padding: 6px; border-width: 3px; border-radius: 12px; } #boardWrap { padding: 6px; }
+    .draw-pile img { width: var(--card-size); height: var(--card-size); } .draw-pile span { font-size: 9px; }
+    #drawPileContainer { margin-left: 3px; } #startScreen { padding: 20px; } .modeBtn { padding: 8px 12px; font-size: 13px; }
+    .bigBtn { padding: 10px 22px; font-size: 13px; } .rulesBox { font-size: 10px; padding: 10px; }
+    .ctrlBtn { padding: 6px 10px; font-size: 12px; }
   }
-
-  @media (orientation: portrait) and (max-width: 1024px) {
-    :root { --card-size: 50px; --hand-card-size: 45px; --nav-btn-size: 26px; }
-    body { padding: 5px; }
-    h1 { font-size: 18px; }
-    .subtitle { font-size: 10px; }
-    #table { padding: 5px; border-width: 3px; border-radius: 10px; }
-    #boardWrap { padding: 4px; }
-    .draw-pile span { font-size: 10px; }
-    #log { height: 45px; font-size: 10px; padding: 5px 8px; }
-    .ctrlBtn { font-size: 10px; padding: 4px 8px; }
-    .nav-btn { font-size: 13px; }
-  }
-
   @media (max-height: 800px) {
-    :root { --card-size: 54px; --hand-card-size: 48px; --nav-btn-size: 28px; }
-    h1 { font-size: 20px; } .subtitle { font-size: 11px; }
-    #table { padding: 6px; border-width: 4px; } #boardWrap { padding: 6px; }
-    #log { height: 50px; font-size: 11px; }
-    .draw-pile span { font-size: 10px; }
+    :root { --card-size: 56px; --hand-card-size: 50px; --nav-btn-size: 30px; }
+    h1 { font-size: 20px; margin-top: 2px; } .subtitle { font-size: 11px; margin-bottom: 5px; }
+    #table { padding: 8px; border-width: 4px; } #boardWrap { padding: 8px; }
   }
 </style>
 </head>
@@ -232,7 +220,7 @@
   </div>
   <button class="bigBtn" id="btnStart">Mulai Permainan</button>
   <div class="rulesBox">
-    <b>Cara main:</b> Klik kartu untuk memilih, lalu tekan R untuk rotasi. Atau drag kartu langsung ke sel papan. Gunakan tombol panah di pojok kanan bawah papan untuk menggeser tampilan jika di-zoom. Tekan 💡 untuk melihat semua kemungkinan langkah, dan 🔊 untuk mute suara.
+    <b>Cara main:</b> Klik kartu untuk memilih, lalu tekan R untuk rotasi. Atau drag kartu langsung ke sel papan. Gunakan tombol panah di pojok kanan bawah papan untuk menggeser tampilan jika di-zoom. Tekan 💡 untuk melihat semua kemungkinan langkah, dan tombol ⏸ untuk pause.
   </div>
 </div>
 
@@ -260,7 +248,7 @@
         <button class="nav-btn" style="grid-area: right" onclick="pan(-50, 0)">→</button>
         <button class="nav-btn" style="grid-area: clue" onclick="showClue()" title="Tampilkan Petunjuk">💡</button>
         <button class="nav-btn" style="grid-area: down" onclick="pan(0, -50)">↓</button>
-        <button class="nav-btn" style="grid-area: mute" onclick="toggleMute()" title="Mute/Unmute">🔊</button>
+        <button class="nav-btn" style="grid-area: mute" onclick="openPauseMenu()" title="Pause">⏸</button>
       </div>
     </div>
 
@@ -280,15 +268,22 @@
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Log dan Restart di luar table, selalu terlihat -->
-  <div id="log"></div>
-
-  <div id="restartBar">
-    <button class="ctrlBtn gray" id="btnRestart">Ulang / Ganti Mode</button>
+<!-- Popup Pause -->
+<div id="pauseOverlay">
+  <div class="box">
+    <h2>⏸ Pause</h2>
+    <div class="logArea" id="logContent"></div>
+    <div class="buttons">
+      <button id="resumeBtn">Lanjutkan</button>
+      <button id="restartBtn">Ulang Permainan</button>
+      <button id="changeModeBtn">Ganti Mode</button>
+    </div>
   </div>
 </div>
 
+<!-- Overlay Hasil (tetap ada) -->
 <div id="overlay">
   <div class="box">
     <h2 id="ovTitle"></h2>
@@ -430,16 +425,53 @@ function stopMenuMusic() {
   menuMusicPlaying = false;
 }
 
-function toggleMute() {
-  isMuted = !isMuted;
-  const btn = document.querySelector('[style*="grid-area: mute"]');
-  if (btn) btn.textContent = isMuted ? '🔇' : '🔊';
-  if (isMuted) stopMenuMusic();
-  else if (menuMusicPlaying) playMenuMusic();
-  else {
-    if (!document.getElementById('gameScreen').style.display || document.getElementById('gameScreen').style.display === 'none') playMenuMusic();
-  }
+/* Pause system */
+let gamePaused = false;
+let gameLogs = [];
+
+function addLog(msg, who){
+  const whoLabel = who==="p1" ? "[P1] " : who==="p2" ? "[P2] " : "";
+  gameLogs.push(whoLabel + msg);
+  // Batasi log agar tidak terlalu panjang
+  if(gameLogs.length > 50) gameLogs.shift();
 }
+
+function openPauseMenu(){
+  if(!S) return;
+  gamePaused = true;
+  // Render log ke popup
+  const logContent = document.getElementById('logContent');
+  logContent.innerHTML = gameLogs.length ? gameLogs.map(l => `<div>${l}</div>`).join('') : '<div>Belum ada aksi.</div>';
+  document.getElementById('pauseOverlay').style.display = 'flex';
+  // Hentikan musik jika sedang berjalan? Kita bisa biarkan, tapi pause juga bisa hentikan menu music jika di game.
+  // Lebih baik hentikan efek suara? Tidak perlu.
+}
+
+function closePauseMenu(){
+  gamePaused = false;
+  document.getElementById('pauseOverlay').style.display = 'none';
+}
+
+function restartGame(){
+  closePauseMenu();
+  // Restart dengan mode yang sama
+  const mode = S.mode;
+  gameLogs = [];
+  document.getElementById('log').innerHTML = ""; // tidak ada log element
+  newGame(mode);
+}
+
+function changeMode(){
+  closePauseMenu();
+  gameLogs = [];
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+  playMenuMusic(); // mainkan musik menu
+}
+
+document.getElementById('resumeBtn').onclick = closePauseMenu;
+document.getElementById('restartBtn').onclick = restartGame;
+document.getElementById('changeModeBtn').onclick = changeMode;
 
 function perms(a){
   if(a.length <= 1) return [a.slice()];
@@ -497,7 +529,7 @@ function newGame(mode){
     showClue: false, clueTimeout: null
   };
   viewState = { scale: 1, x: 0, y: 0 };
-  log("Permainan dimulai! Player 1 jalan pertama.");
+  addLog("Permainan dimulai! Player 1 jalan pertama.");
   renderAll();
 }
 
@@ -554,7 +586,7 @@ function cardHTML(q, cls, style){
 }
 
 function showClue() {
-  if(S.locked || S.animating) return;
+  if(S.locked || S.animating || gamePaused) return;
   S.showClue = true;
   renderBoard();
   clearTimeout(S.clueTimeout);
@@ -566,6 +598,7 @@ function showClue() {
 }
 
 function renderBoard(){
+  if(gamePaused) return; // Jangan render saat pause
   const cells = [...S.board.keys()].map(k=>k.split(",").map(Number));
   const legalSet = new Set();
   if(!S.locked && !S.animating && S.showClue){
@@ -626,6 +659,7 @@ function applyTransform(){
 }
 
 function zoomIn() {
+  if(gamePaused) return;
   viewState.scale += 0.1;
   if (viewState.scale > 3) viewState.scale = 3;
   SoundEffects.zoom();
@@ -633,6 +667,7 @@ function zoomIn() {
 }
 
 function zoomOut() {
+  if(gamePaused) return;
   viewState.scale -= 0.1;
   if (viewState.scale < 0.5) viewState.scale = 0.5;
   SoundEffects.zoom();
@@ -640,6 +675,7 @@ function zoomOut() {
 }
 
 function pan(dx, dy) {
+  if(gamePaused) return;
   viewState.x += dx;
   viewState.y += dy;
   SoundEffects.pan();
@@ -647,6 +683,7 @@ function pan(dx, dy) {
 }
 
 function resetView() {
+  if(gamePaused) return;
   viewState.scale = baseFitScale;
   viewState.x = 0;
   viewState.y = 0;
@@ -655,6 +692,7 @@ function resetView() {
 }
 
 function renderHands(){
+  if(gamePaused) return;
   let h1 = "";
   S.hands[0].forEach((c,i)=>{
     const rot = S.handRotations[0][i] || 0;
@@ -690,7 +728,7 @@ function renderStatus(){
   const btn1 = document.getElementById("btnDraw1");
   const btn2 = document.getElementById("btnDraw2");
 
-  if(S.locked || S.animating){
+  if(S.locked || S.animating || gamePaused){
     btn1.disabled = true; btn2.disabled = true;
     btn1.textContent = "Ambil Kartu"; btn2.textContent = "Ambil Kartu";
   } else {
@@ -709,11 +747,9 @@ function renderStatus(){
 
 function renderAll(){ renderBoard(); renderHands(); renderStatus(); }
 
+/* Log sekarang disimpan ke gameLogs dan ditampilkan di popup */
 function log(msg, who){
-  const el = document.getElementById("log");
-  const w = who==="p1" ? '<b class="kamu">P1</b>' : who==="p2" ? '<b class="ai">P2</b>' : null;
-  el.insertAdjacentHTML("afterbegin", "<p>"+(w?w+" ": "")+msg+"</p>");
-  while(el.children.length > 40) el.lastChild.remove();
+  addLog(msg, who);
 }
 
 function animateMoveCard(fromElement, toElement, cardQ, callback){
@@ -783,7 +819,7 @@ function attachDrag(el, pid, cardIndex){
 
   el.addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    if(S.locked || S.animating || S.turn !== pid) return;
+    if(S.locked || S.animating || S.turn !== pid || gamePaused) return;
     startX = e.clientX; startY = e.clientY;
     isDragging = false;
     SoundEffects.click();
@@ -791,7 +827,7 @@ function attachDrag(el, pid, cardIndex){
   });
 
   el.addEventListener('pointermove', (e) => {
-    if(S.locked || S.animating || S.turn !== pid) return;
+    if(S.locked || S.animating || S.turn !== pid || gamePaused) return;
     if(!isDragging){
       const dx = Math.abs(e.clientX - startX);
       const dy = Math.abs(e.clientY - startY);
@@ -824,7 +860,7 @@ function attachDrag(el, pid, cardIndex){
   });
 
   el.addEventListener('pointerup', (e) => {
-    if(S.locked || S.animating || S.turn !== pid) return;
+    if(S.locked || S.animating || S.turn !== pid || gamePaused) return;
     el.style.opacity = '1';
     document.body.classList.remove('interaction-dragging');
     if(!isDragging){ onHandClick(pid, cardIndex); return; }
@@ -898,7 +934,7 @@ function attachDrag(el, pid, cardIndex){
 }
 
 function onHandClick(pid, i){
-  if(S.locked || S.animating) return;
+  if(S.locked || S.animating || gamePaused) return;
   if(S.turn !== pid) return;
   if(S.selected === i){ S.selected = -1; }
   else {
@@ -910,7 +946,7 @@ function onHandClick(pid, i){
 }
 
 function onCellClick(x, y){
-  if(S.locked || S.animating || S.selected < 0) return;
+  if(S.locked || S.animating || S.selected < 0 || gamePaused) return;
   const pid = S.turn;
   const card = S.hands[pid][S.selected];
   const q = rotated(card, S.selRot);
@@ -946,7 +982,7 @@ function placeCard(pid, cardIndex, x, y, q){
 }
 
 function handleRotate(pid){
-  if(S.locked || S.animating || S.turn !== pid || S.selected < 0) return;
+  if(S.locked || S.animating || S.turn !== pid || S.selected < 0 || gamePaused) return;
   S.selRot = (S.selRot + 1) % 4;
   S.handRotations[pid][S.selected] = S.selRot;
   SoundEffects.rotate();
@@ -962,11 +998,11 @@ function handleRotate(pid){
 document.getElementById("btnRotate1").onclick = ()=> handleRotate(0);
 document.getElementById("btnRotate2").onclick = ()=> handleRotate(1);
 document.addEventListener("keydown", e=>{
-  if(e.key.toLowerCase()==="r") handleRotate(S.turn);
+  if(e.key.toLowerCase()==="r" && !gamePaused) handleRotate(S.turn);
 });
 
 document.getElementById("btnDraw1").onclick = ()=>{
-  if(S.locked || S.animating || S.turn !== 0) return;
+  if(S.locked || S.animating || S.turn !== 0 || gamePaused) return;
   const canMove = legalMoves(S.hands[0]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
@@ -985,7 +1021,7 @@ document.getElementById("btnDraw1").onclick = ()=>{
 };
 
 document.getElementById("btnDraw2").onclick = ()=>{
-  if(S.locked || S.animating || S.turn !== 1) return;
+  if(S.locked || S.animating || S.turn !== 1 || gamePaused) return;
   const canMove = legalMoves(S.hands[1]).length > 0;
   if(canMove) return;
   if(S.draw.length > 0){
@@ -1001,14 +1037,6 @@ document.getElementById("btnDraw2").onclick = ()=>{
     log("tumpukan habis, pass.", "p2");
     endTurn(1);
   }
-};
-
-document.getElementById("btnRestart").onclick = ()=>{
-  SoundEffects.click();
-  stopMenuMusic();
-  document.getElementById("gameScreen").style.display = "none";
-  document.getElementById("startScreen").style.display = "flex";
-  playMenuMusic();
 };
 
 function endTurn(pi){
@@ -1046,7 +1074,7 @@ function endTurn(pi){
   } else {
     S.locked = false;
     renderAll();
-    log("Giliran " + (S.turn === 0 ? "Player 1" : "Player 2") + ".", null);
+    log("Giliran " + (S.turn === 0 ? "Player 1" : "Player 2") + ".");
   }
 }
 
@@ -1126,7 +1154,7 @@ document.getElementById("btnStart").onclick = ()=>{
   SoundEffects.click();
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("gameScreen").style.display = "flex";
-  document.getElementById("log").innerHTML = "";
+  gameLogs = []; // reset log
   newGame(currentMode);
 };
 
